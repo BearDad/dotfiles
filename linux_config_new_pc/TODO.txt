@@ -1,0 +1,22 @@
+
+## Ricing Todo
+- [x] Choosing a desktop environment->
+- [x] Choosing a window manager------>   Hyperland (yaaaay)
+- [x] Terminal----------------------->   Kitty (wwwweh)
+- [x] The Aesthetics----------------->   Something between 
+  Aesthetics wise should be like this link: https://nx2.site/grub-ascii-theme
+- [x] Colorschemes
+- [x] Icons and Cursors-------------->   Cursor(Phinger) link:https://github.com/phisch/phinger-cursors ============= Icon theme ----> link: https://github.com/m4thewz/dracula-icons
+- [x] Wallpapers--------------------->   maybe ascci using this tool link:https://lachlanarthur.github.io/Braille-ASCII-Art/
+  or something similar to rosepines -palette
+
+- [ ] Compositing-------------------->   idk what this is
+- [x] The Bars And Widgets----------->   waybar
+- [x] Terminal Eyecandy-------------->   current starship config+fish
+- [x] Display manager---------------->   SDDM (Installs when using archinstall) -> whit this theme (https://github.com/Keyitdev/sddm-astronaut-theme/tree/ae6b7a4ad8d14da1cc3c3b712f1241b75dcfe836)
+
+
+
+
+
+

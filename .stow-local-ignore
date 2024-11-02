@@ -1,0 +1,6 @@
+\.git
+misc
+#license
+^/.*\.org
+^/.*\.md
+/snaps
