@@ -24,7 +24,7 @@ return {
         math_fracs = true,
         math_super_sub = true,
         math_symbols = true,
-        sections = false,
+        sections = true,
         styles = true,
       }
     end,
