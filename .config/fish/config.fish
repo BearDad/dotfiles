@@ -56,9 +56,19 @@ set -Ux FZF_DEFAULT_OPTS "
 
 # Created by `pipx` on 2024-09-04 21:21:33
 set PATH $PATH /home/bd23/.local/bin
+
 function starship_transient_prompt_func
     starship module character
 
+end
+
+function y
+    set tmp (mktemp -t "yazi-cwd.XXXXXX")
+    yazi $argv --cwd-file="$tmp"
+    if set cwd (command cat -- "$tmp"); and [ -n "$cwd" ]; and [ "$cwd" != "$PWD" ]
+        builtin cd -- "$cwd"
+    end
+    rm -f -- "$tmp"
 end
 
 starship init fish | source
