@@ -12,3 +12,23 @@ vim.keymap.set(
   { desc = "Toggle Tree-sitter highlighting" }
 )
 vim.keymap.set("n", "<leader>z", ":!zathura <C-r>=expand('%:r')<cr>.pdf &<cr>", { desc = "Open PDF" })
+
+vim.keymap.set({ "n" }, "<leader>p", function()
+  local file_name = vim.fn.expand("%:t")
+  if file_name ~= "" then
+    -- Open Explorer in the current directory and select the file
+    vim.fn.system({ "explorer.exe", "/select,", file_name })
+  else
+    print("No file name found. Save the buffer first.")
+  end
+end, { desc = "Open file location in Explorer" })
+
+vim.keymap.set({ "n" }, "<leader>o", function()
+  local file_name = vim.fn.expand("%:t")
+  if file_name ~= "" then
+    -- Open Explorer in the current directory and select the file
+    vim.fn.system({ "explorer.exe", file_name })
+  else
+    print("No file found. Make sure the buffer is saved.")
+  end
+end, { desc = "Open file " })
