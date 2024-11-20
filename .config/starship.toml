@@ -17,7 +17,7 @@ $nim \
 $rust \
 $scala \
 $python \
-$time\n  \
+$time\n\
 [󱞪](fg:iris)
 """
 command_timeout = 1000
