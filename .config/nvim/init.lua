@@ -128,7 +128,7 @@ vim.opt.ignorecase = true
 vim.opt.smartcase = true
 
 -- Keep signcolumn on by default
-vim.opt.signcolumn = 'auto'
+vim.opt.signcolumn = 'number'
 
 -- Decrease update time
 vim.opt.updatetime = 250
@@ -276,7 +276,7 @@ require('lazy').setup({
         -- set icon mappings to true if you have a Nerd Font
         mappings = vim.g.have_nerd_font,
         -- If you are using a Nerd Font: set icons.keys to an empty table which will use the
-        -- default whick-key.nvim defined Nerd Font icons, otherwise define a string table
+        -- default which-key.nvim defined Nerd Font icons, otherwise define a string table
         keys = vim.g.have_nerd_font and {} or {
           Up = '<Up> ',
           Down = '<Down> ',
@@ -587,11 +587,12 @@ require('lazy').setup({
 
       -- Change diagnostic symbols in the sign column (gutter)
       -- if vim.g.have_nerd_font then
-      --   local signs = { Error = '', Warn = '', Hint = '', Info = '' }
+      --   local signs = { ERROR = '', WARN = '', INFO = '', HINT = '' }
+      --   local diagnostic_signs = {}
       --   for type, icon in pairs(signs) do
-      --     local hl = 'DiagnosticSign' .. type
-      --     vim.fn.sign_define(hl, { text = icon, texthl = hl, numhl = hl })
+      --     diagnostic_signs[vim.diagnostic.severity[type]] = icon
       --   end
+      --   vim.diagnostic.config { signs = { text = diagnostic_signs } }
       -- end
 
       -- LSP servers and clients are able to communicate to each other what features they support.
@@ -870,17 +871,17 @@ require('lazy').setup({
       require('mini.surround').setup() -- Simple and easy statusline.
       --  You could remove this setup call if you don't like it,
       --  and try some other statusline plugin
-      local statusline = require 'mini.statusline'
-      -- set use_icons to true if you have a Nerd Font
-      statusline.setup { use_icons = true }
-
-      -- You can configure sections in the statusline by overriding their
-      -- default behavior. For example, here we set the section for
-      -- cursor location to LINE:COLUMN
-      ---@diagnostic disable-next-line: duplicate-set-field
-      statusline.section_location = function()
-        return '%2l:%-2v'
-      end
+      -- local statusline = require 'mini.statusline'
+      -- -- set use_icons to true if you have a Nerd Font
+      -- statusline.setup { use_icons = true }
+      --
+      -- -- You can configure sections in the statusline by overriding their
+      -- -- default behavior. For example, here we set the section for
+      -- -- cursor location to LINE:COLUMN
+      -- ---@diagnostic disable-next-line: duplicate-set-field
+      -- statusline.section_location = function()
+      --   return '%2l:%-2v'
+      -- end
 
       -- ... and there is more!
       --  Check out: https://github.com/echasnovski/mini.nvim
@@ -981,6 +982,7 @@ require('lazy').setup({
   --
   --  Uncomment the following line and add your plugins to `lua/custom/plugins/*.lua` to get going.
   { import = 'custom.plugins' },
+
   --
   -- For additional information with loading, sourcing and examples see `:help lazy.nvim-🔌-plugin-spec`
   -- Or use telescope!
@@ -1103,9 +1105,6 @@ vim.g.vimtex_view_method = ''
 vim.g.vimtex_compiler_method = 'latexmk'
 vim.opt.guicursor = 'a:block'
 
-vim.keymap.set('v', 'J', ":m '>+1<CR>gv=gv", { desc = 'Move down' })
-vim.keymap.set('v', 'K', ":m '<-2<CR>gv=gv", { desc = 'Move up' })
-
 vim.keymap.set('n', '<leader>n', '<cmd>NerdIcons<cr>', { desc = 'Open NerdIcons' })
 vim.keymap.set({ 'n', 'v' }, '<C-p>', '"*p', { desc = 'Paste from selection clipboard' })
 vim.keymap.set({ 'n', 'v' }, 'p', '"+p', { desc = 'Paste from system clipboard' })
@@ -1131,3 +1130,268 @@ vim.keymap.set({ 'n' }, '<leader>o', function()
     print 'No file found. Make sure the buffer is saved.'
   end
 end, { desc = 'Open file ' })
+
+-- NOTE: THESE ARE FROM https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
+
+vim.keymap.set({ 'n', 'x' }, 'j', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
+-- vim.keymap.set({ 'n', 'x' }, '<Down>', "v:count == 0 ? 'gj' : 'j'", { desc = 'Down', expr = true, silent = true })
+vim.keymap.set({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
+-- vim.keymap.set({ 'n', 'x' }, '<Up>', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', expr = true, silent = true })
+
+-- to window using the <ctrl> hjkl keys
+vim.keymap.set('n', '<C-h>', '<C-w>h', { desc = 'Go to Left Window', remap = true })
+vim.keymap.set('n', '<C-j>', '<C-w>j', { desc = 'Go to Lower Window', remap = true })
+vim.keymap.set('n', '<C-k>', '<C-w>k', { desc = 'Go to Upper Window', remap = true })
+vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to Right Window', remap = true })
+
+vim.keymap.set('n', '<A-j>', "<cmd>execute 'move .+' . v:count1<cr>==", { desc = 'Move Down' })
+vim.keymap.set('n', '<A-k>', "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = 'Move Up' })
+vim.keymap.set('i', '<A-j>', '<esc><cmd>m .+1<cr>==gi', { desc = 'Move Down' })
+vim.keymap.set('i', '<A-k>', '<esc><cmd>m .-2<cr>==gi', { desc = 'Move Up' })
+vim.keymap.set('v', '<A-j>', ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = 'Move Down' })
+vim.keymap.set('v', '<A-k>', ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = 'Move Up' })
+
+-- better indenting
+vim.keymap.set('v', '<', '<gv')
+vim.keymap.set('v', '>', '>gv')
+
+-- commenting
+vim.keymap.set('n', 'gco', 'o<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add Comment Below' })
+vim.keymap.set('n', 'gcO', 'O<esc>Vcx<esc><cmd>normal gcc<cr>fxa<bs>', { desc = 'Add Comment Above' })
+
+-- windows
+vim.keymap.set('n', '<leader>w', '<c-w>', { desc = 'Windows', remap = true })
+vim.keymap.set('n', '<leader>-', '<C-W>s', { desc = 'Split Window Below', remap = true })
+vim.keymap.set('n', '<leader>|', '<C-W>v', { desc = 'Split Window Right', remap = true })
+vim.keymap.set('n', '<leader>wd', '<C-W>c', { desc = 'Delete Window', remap = true })
+
+-- native snippets
+if vim.fn.has 'nvim-0.11' == 0 then
+  vim.keymap.set('s', '<Tab>', function()
+    return vim.snippet.active { direction = 1 } and '<cmd>lua vim.snippet.jump(1)<cr>' or '<Tab>'
+  end, { expr = true, desc = 'Jump Next' })
+  vim.keymap.set({ 'i', 's' }, '<S-Tab>', function()
+    return vim.snippet.active { direction = -1 } and '<cmd>lua vim.snippet.jump(-1)<cr>' or '<S-Tab>'
+  end, { expr = true, desc = 'Jump Previous' })
+end
+-- inc rename
+
+vim.keymap.set('n', '<leader>cr', function()
+  return ':IncRename ' .. vim.fn.expand '<cword>'
+end, { expr = true })
+
+-- NOTE: END OF LINE CHARS
+vim.opt.fillchars = { eob = ' ' }
+-- NOTE: LULALINE CONFIG
+--
+--
+local lualine = require 'lualine'
+
+-- Color table for highlights
+-- stylua: ignore
+local colors = {
+  bg       = '#191724',
+  fg       = '#26233a',
+  yellow   = '#f6c177',
+  cyan     = '#9ccfd8',
+  darkblue = '#31748f',
+  green    = '#31748f',
+  orange   = '#ebbcba',
+  violet   = '#c4a7e7',
+  magenta  = '#c4a7e7',
+  blue     = '#31748f',
+  red      = 'eb6f92',
+}
+
+local conditions = {
+  buffer_not_empty = function()
+    return vim.fn.empty(vim.fn.expand '%:t') ~= 1
+  end,
+  hide_in_width = function()
+    return vim.fn.winwidth(0) > 80
+  end,
+  check_git_workspace = function()
+    local filepath = vim.fn.expand '%:p:h'
+    local gitdir = vim.fn.finddir('.git', filepath .. ';')
+    return gitdir and #gitdir > 0 and #gitdir < #filepath
+  end,
+}
+
+-- Config
+--
+--
+
+local config = {
+  options = {
+    -- Disable sections and component separators
+    component_separators = '',
+    section_separators = '',
+    theme = {
+      -- We are going to use lualine_c an lualine_x as left and
+      -- right section. Both are highlighted by c theme .  So we
+      -- are just setting default looks o statusline
+      normal = { c = { fg = colors.fg, bg = colors.bg } },
+      inactive = { c = { fg = colors.fg, bg = colors.bg } },
+    },
+  },
+  sections = {
+    -- these are to remove the defaults
+    lualine_a = {},
+    lualine_b = {},
+    lualine_y = {},
+    lualine_z = {},
+    -- These will be filled later
+    lualine_c = {},
+    lualine_x = {},
+  },
+  inactive_sections = {
+    -- these are to remove the defaults
+    lualine_a = {},
+    lualine_b = {},
+    lualine_y = {},
+    lualine_z = {},
+    lualine_c = {},
+    lualine_x = {},
+  },
+}
+
+-- Inserts a component in lualine_c at left section
+local function ins_left(component)
+  table.insert(config.sections.lualine_c, component)
+end
+
+-- Inserts a component in lualine_x at right section
+local function ins_right(component)
+  table.insert(config.sections.lualine_x, component)
+end
+
+ins_left {
+  function()
+    return '▊'
+  end,
+  color = { fg = colors.blue }, -- Sets highlighting of component
+  padding = { left = 0, right = 1 }, -- We don't need space before this
+}
+
+ins_left {
+  -- mode component
+  function()
+    return ''
+  end,
+  color = function()
+    -- auto change color according to neovims mode
+    local mode_color = {
+      n = colors.red,
+      i = colors.green,
+      v = colors.blue,
+      [''] = colors.blue,
+      V = colors.blue,
+      c = colors.magenta,
+      no = colors.red,
+      s = colors.orange,
+      S = colors.orange,
+      [''] = colors.orange,
+      ic = colors.yellow,
+      R = colors.violet,
+      Rv = colors.violet,
+      cv = colors.red,
+      ce = colors.red,
+      r = colors.cyan,
+      rm = colors.cyan,
+      ['r?'] = colors.cyan,
+      ['!'] = colors.red,
+      t = colors.red,
+    }
+    return { fg = mode_color[vim.fn.mode()] }
+  end,
+  padding = { right = 1 },
+}
+
+ins_left {
+  -- filesize component
+  'filesize',
+  cond = conditions.buffer_not_empty,
+  color = { fg = colors.yellow },
+}
+
+ins_left {
+  'filename',
+  cond = conditions.buffer_not_empty,
+  color = { fg = colors.magenta, gui = 'bold' },
+}
+
+ins_left { 'location', color = { fg = colors.yellow } }
+
+-- Insert mid section. You can make any number of sections in neovim :)
+-- for lualine it's any number greater then 2
+ins_left {
+  function()
+    return '%='
+  end,
+}
+
+ins_left {
+  icon = ' LSP:',
+  color = { fg = '#ffffff', gui = 'bold' },
+  'filetype',
+  -- -- Lsp server name .
+  -- function()
+  --   local msg = 'No Active Lsp'
+  --   local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = 0 })
+  --   local clients = vim.lsp.get_clients()
+  --   if next(clients) == nil then
+  --     return msg
+  --   end
+  --   for _, client in ipairs(clients) do
+  --     local filetypes = client.config.filetypes
+  --     if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
+  --       return client.name
+  --     end
+  --   end
+  --   return msg
+  -- end,
+}
+
+-- Add components to right sections
+-- ins_right {
+--   'o:encoding', -- option component same as &encoding in viml
+--   fmt = string.upper, -- I'm not sure why it's upper case either ;)
+--   cond = conditions.hide_in_width,
+--   color = { fg = colors.green, gui = 'bold' },
+-- }
+
+-- ins_right {
+--   'fileformat',
+--   fmt = string.upper,
+--   icons_enabled = false, -- I think icons are cool but Eviline doesn't have them. sigh
+--   color = { fg = colors.green, gui = 'bold' },
+-- }
+
+ins_right {
+  'branch',
+  icon = '',
+  color = { fg = colors.violet, gui = 'bold' },
+}
+
+ins_right {
+  'diff',
+  -- Is it me or the symbol for modified us really weird
+  symbols = { added = ' ', modified = '󰬊  ', removed = ' ' },
+  diff_color = {
+    added = { fg = colors.green },
+    modified = { fg = colors.orange },
+    removed = { fg = colors.red },
+  },
+  cond = conditions.hide_in_width,
+}
+
+ins_right {
+  function()
+    return '▊'
+  end,
+  color = { fg = colors.blue },
+  padding = { left = 1 },
+}
+
+-- Now don't forget to initialize lualine
+lualine.setup(config)
