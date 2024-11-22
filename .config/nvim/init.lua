@@ -1101,10 +1101,12 @@ vim.cmd 'colorscheme rose-pine'
 --
 -- NOTE: This are my personal keybinds
 --
+--
+--
 vim.g.vimtex_view_method = ''
 vim.g.vimtex_compiler_method = 'latexmk'
 vim.opt.guicursor = 'a:block'
-
+vim.keymap.set('n', '<leader>e', '<cmd>Telescope emoji<cr>', { desc = 'Open NerdIcons' })
 vim.cmd [[
   autocmd CmdwinEnter * q
 ]]
