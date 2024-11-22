@@ -1105,6 +1105,10 @@ vim.g.vimtex_view_method = ''
 vim.g.vimtex_compiler_method = 'latexmk'
 vim.opt.guicursor = 'a:block'
 
+vim.cmd [[
+  autocmd CmdwinEnter * q
+]]
+
 vim.keymap.set('n', '<leader>n', '<cmd>NerdIcons<cr>', { desc = 'Open NerdIcons' })
 vim.keymap.set({ 'n', 'v' }, '<C-p>', '"*p', { desc = 'Paste from selection clipboard' })
 vim.keymap.set({ 'n', 'v' }, 'p', '"+p', { desc = 'Paste from system clipboard' })
@@ -1395,3 +1399,5 @@ ins_right {
 
 -- Now don't forget to initialize lualine
 lualine.setup(config)
+
+vim.api.nvim_set_hl(0, 'CursorLine', { bg = '#191724' }) -- Use a darker or blended color
