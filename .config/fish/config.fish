@@ -70,6 +70,6 @@ function y
     end
     rm -f -- "$tmp"
 end
-
+cd ~/
 starship init fish | source
 enable_transience
