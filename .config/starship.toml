@@ -1,22 +1,22 @@
 
 format = """
-$username \
-$directory \
-$git_branch \
-$git_status \
-$fill \
-$c \
-$elixir \
-$elm \
-$golang \
-$haskell \
-$java \
-$julia \
-$nodejs \
-$nim \
-$rust \
-$scala \
-$python \
+$username\
+$directory\
+$git_branch\
+$git_status\
+$fill\
+$c\
+$elixir\
+$elm\
+$golang\
+$haskell\
+$java\
+$julia\
+$nodejs\
+$nim\
+$rust\
+$scala\
+$python\
 $time\n\
 [󱞪](fg:iris)
 """
@@ -34,7 +34,7 @@ foam = '#9ccfd8'
 iris = '#c4a7e7'
 
 [directory]
-format = "[](fg:overlay)[ $path ]($style)[](fg:overlay)"
+format = "[](fg:overlay)[ $path ]($style)[](fg:overlay) "
 style = "bg:overlay fg:pine"
 truncation_length = 3
 truncation_symbol = "…/"
@@ -53,13 +53,13 @@ style = "fg:overlay"
 symbol = " "
 
 [git_branch]
-format = "[](fg:overlay)[ $symbol $branch ]($style)[](fg:overlay)"
+format = "[](fg:overlay)[ $symbol $branch ]($style)[](fg:overlay) "
 style = "bg:overlay fg:foam"
 symbol = ""
 
 # [git_status]
 # style = "bg:overlay fg:love"
-# format = '[](fg:overlay)[$all_status$ahead_behind]($style)[](fg:overlay)'
+# format = ' [](fg:overlay)[$all_status$ahead_behind]($style)[](fg:overlay) '
 # disabled = false
 
 [git_status]
@@ -79,14 +79,14 @@ behind = '[⇣\(${count}\)](bg:overlay fg:rose)'
 #
 [time]
 disabled = false
-format = "[](fg:overlay)[ $time 󰴈 ]($style)[](fg:overlay)"
+format = " [](fg:overlay)[ $time 󰴈 ]($style)[](fg:overlay) "
 style = "bg:overlay fg:rose"
 time_format = "%I:%M%P"
 use_12hr = true
 
 [username]
 disabled = false
-format = "[](fg:overlay)[ 󰧱 $user ]($style)[](fg:overlay)"
+format = "[](fg:overlay)[ 󰧱 $user ]($style)[](fg:overlay) "
 show_always = true
 style_root = "bg:overlay fg:iris"
 style_user = "bg:overlay fg:iris"
