@@ -4,7 +4,7 @@
 
 ---
 
-![terminal](/snaps/tmux+nvim.png)
+![terminal](./snaps/term.png)
 
 - utilities
   - stow
