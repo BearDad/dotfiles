@@ -7,7 +7,7 @@ return {
 
       -- Window appearance
       window = {
-        width = 40, -- Width of the floating window
+        width = 80, -- Width of the floating window
         height = 20, -- Height of the floating window
         border = 'rounded', -- Border style
       },
@@ -57,7 +57,7 @@ return {
         {
           min = 5, -- Corresponds to `urgent` and `important` tasks
           max = 999,
-          color = nil,
+          color = nil, --this is not yet implemented
           hl_group = 'DiagnosticError',
         },
         {
@@ -76,7 +76,7 @@ return {
           min = 0, -- Corresponds to `none` tasks
           max = 1,
           color = nil,
-          hl_group = 'DiagnosticHint',
+          hl_group = 'Diagnostic',
         },
       },
 
