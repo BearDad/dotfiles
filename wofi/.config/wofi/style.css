@@ -1,0 +1,56 @@
+#window {
+    border-radius: 14px;
+    background-color: #191724;
+    /* Base background (Rosepine Base) */
+}
+
+#input {
+    padding: 4px;
+    border-radius: 14px;
+    font-size: 16px;
+    background-color: #1f1d2e;
+    /* Input background (Rosepine Surface) */
+    border: none;
+    color: #e0def4;
+    /* Text color (Rosepine Text) */
+    margin: 16px 16px 0px 16px;
+    /* Simulate padding for the input */
+}
+
+#input:focus {
+    box-shadow: none;
+}
+
+#scroll {
+    border-radius: 14px;
+    background-color: #26233a;
+    /* Scroll background (Rosepine Highlight Low) */
+    margin: 16px;
+    /* Simulate padding around the scroll area */
+}
+
+#inner-box {
+    border-radius: 14px;
+    /* padding: 16px; */
+    /* Adds space inside this box */
+    margin: 12px;
+    /* Adds spacing around the box */
+}
+
+#entry {
+    padding: 8px;
+    color: #e0def4;
+    /* Entry text color (Rosepine Text) */
+}
+
+#entry:selected {
+    border-radius: 8px;
+    background-color: #eb6f92;
+    /* Selected entry background (Rosepine Highlight Med) */
+    color: #f2e9de;
+    /* Selected entry text (Rosepine Highlight High) */
+}
+
+#entry image {
+    margin-right: 8px;
+}

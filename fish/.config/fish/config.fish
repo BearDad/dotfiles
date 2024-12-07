@@ -10,7 +10,10 @@ if status is-interactive
     export PATH="$PATH:$HOME/.cargo/bin"
     export PATH="$PATH:$HOME/../../usr/local/texlive/2024/bin/x86_64-linux/"
     export PATH="$PATH:$HOME/tmux/"
-    # export PATH="$PATH:$HOME/bin"
+    export PATH="$PATH:$HOME/bin"
+    export PATH="$PATH:$HOME/apps/"
+
+export PATH="$PATH:/usr/local/bin/node"
     # alias vim="nvim"
 end
 if status is-interactive
@@ -30,7 +33,7 @@ if status is-interactive
     alias td="tmux detach"
     alias py="python3"
     alias python="python3"
-    alias cat="batcat"
+    alias cat="bat"
     alias c="clear"
     alias ls="exa"
     alias ll="exa -l"
@@ -42,9 +45,8 @@ if status is-interactive
     alias gcl="git clone"
     alias gca="git commit -a"
     alias nvim="/usr/bin/nvim.appimage"
-    alias vim="/usr/bin/nvim.appimage"
     alias v="/usr/bin/nvim.appimage"
-    alias bat="batcat"
+    alias bat="bat"
     alias lg="lazygit"
     # oh-my-posh init fish --config ~/tokyonight.toml | source
 end

@@ -244,6 +244,11 @@ require('lazy').setup({
   --    require('gitsigns').setup({ ... })
   --
   -- See `:help gitsigns` to understand what the configuration keys do
+  {
+    'nvim-tree/nvim-web-devicons',
+    enabled = vim.g.have_nerd_font,
+    lazy = false,
+  },
   { -- Adds git related signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
