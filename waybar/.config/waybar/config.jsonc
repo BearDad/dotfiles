@@ -14,7 +14,7 @@
         "hyprland/window"
     ],
     "modules-right": [
-        // "tray",
+        "tray",
         "network",
         "bluetooth",
         "temperature",

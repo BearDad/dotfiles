@@ -90,6 +90,7 @@ return {
   {
     'nvim-tree/nvim-web-devicons',
     lazy = false,
+    enable = true,
     priority = 1000,
   },
 }

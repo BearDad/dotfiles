@@ -5,7 +5,7 @@
 if status is-interactive
     #exported paths
 
-    export EDITOR="/usr/bin/nvim.appimage"
+    export EDITOR="nvim"
     export BAT_THEME='Catppuccin Mocha'
     export PATH="$PATH:$HOME/.cargo/bin"
     export PATH="$PATH:$HOME/../../usr/local/texlive/2024/bin/x86_64-linux/"
@@ -44,8 +44,7 @@ if status is-interactive
     alias gc="git checkout"
     alias gcl="git clone"
     alias gca="git commit -a"
-    alias nvim="/usr/bin/nvim.appimage"
-    alias v="/usr/bin/nvim.appimage"
+    alias v="nvim"
     alias bat="bat"
     alias lg="lazygit"
     # oh-my-posh init fish --config ~/tokyonight.toml | source
