@@ -12,6 +12,8 @@ if status is-interactive
     export PATH="$PATH:$HOME/tmux/"
     export PATH="$PATH:$HOME/bin"
     export PATH="$PATH:$HOME/apps/"
+    
+    export PATH="$PATH:/usr/local/texlive/2024/bin/x86_64-linux/tlmgr"
 
 export PATH="$PATH:/usr/local/bin/node"
     # alias vim="nvim"
