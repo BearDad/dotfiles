@@ -11,7 +11,7 @@
 }
 
 window#waybar {
-	border-radius: 10px;
+	border-radius: 5px;
 	background: @base;
 	color: @iris;
 }
@@ -57,6 +57,10 @@ tooltip {
 #tray,
 #backlight {
 	padding: 0px 14px;
+}
+
+#temperature {
+	color: @rose
 }
 
 #temperature.critical {
