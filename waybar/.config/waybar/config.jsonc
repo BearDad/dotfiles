@@ -22,7 +22,7 @@
         "backlight",
         "pulseaudio",
         "pulseaudio#microphone",
-        "clock"
+        "clock",
     ],
     "include": [],
     "hyprland/window": {
@@ -141,5 +141,5 @@
         "format-disabled": " off",
         "format-connected": " {num_connections}",
         "on-click": "blueberry"
-    }
+    },
 }
