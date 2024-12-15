@@ -10,6 +10,8 @@
 	min-height: 0;
 }
 
+
+
 window#waybar {
 	border-radius: 5px;
 	background: @base;
@@ -105,4 +107,8 @@ tooltip {
 
 #battery {
 	color: @foam;
+}
+
+#custom {
+	color: white;
 }
