@@ -1409,3 +1409,11 @@ require('supermaven-nvim').setup {
     return false
   end, -- condition to check for stopping supermaven, `true` means to stop supermaven when the condition is true. }
 }
+
+vim.keymap.set('n', '<leader>aa', '<cmd>ArduinoAttach<cr>', { desc = 'attach to a device' })
+vim.keymap.set('n', '<leader>av', '<cmd>ArduinoVerify<cr>', { desc = 'verify a sketch' })
+vim.keymap.set('n', '<leader>au', '<cmd>ArduinoUpload<cr>', { desc = 'upload a sketch' })
+vim.keymap.set('n', '<leader>aU', '<cmd>ArduinoUploadAndSerial<cr>', { desc = 'upload a sketch and open serial monitor' })
+vim.keymap.set('n', '<leader>as', '<cmd>ArduinoSerial<cr>', { desc = 'open serial monitor' })
+vim.keymap.set('n', '<leader>ab', '<cmd>ArduinoChooseBoard<cr>', { desc = 'choose board' })
+vim.keymap.set('n', '<leader>ap', '<cmd>ArduinoChooseProgrammer<cr>', { desc = 'choose programmer' })
