@@ -43,12 +43,11 @@ if status is-interactive
     alias lla="eza -la"
     alias gp="git pull"
     alias gu="git push"
+    alias ga="git add ."
     alias gpf="git push --force-with-lease"
     alias gc="git clone"
-    alias gca="git commit -a"
-    alias gwip="git commit -a -m 'Work In Progress'"
+    alias gwip="git commit -m 'Work In Progress'"
     alias v="nvim"
-    alias bat="bat"
     alias lg="lazygit"
     # oh-my-posh init fish --config ~/tokyonight.toml | source
 end
