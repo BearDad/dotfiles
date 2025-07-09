@@ -38,7 +38,7 @@ if status is-interactive
     alias python="python3"
     alias cat="bat"
     alias c="clear"
-    alias ls="eza"
+    alias l="eza"
     alias ll="eza -l"
     alias lla="eza -la"
     alias gp="git pull"
