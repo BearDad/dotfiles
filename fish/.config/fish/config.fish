@@ -1,4 +1,5 @@
 set -g fish_greeting
+
 #if status is-interactive
 #and not set -q TMUX
 # exec tmux
@@ -32,6 +33,7 @@ if status is-interactive
     alias cd="z"
     alias cdi="zi"
     alias fetch="clear && fastfetch"
+    alias ni="clear && nitch"
     alias t="tmux"
     alias td="tmux detach"
     alias py="python3"

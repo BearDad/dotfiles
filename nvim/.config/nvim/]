@@ -89,10 +89,10 @@ P.S. You can delete this when you're done too. It's your config now! :)
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are loaded (otherwise wrong leader will be used)
 vim.g.mapleader = ' '
-vim.g.maplocalleader = ' '
+-- vim.g.maplocalleader = ' '
 
 -- Set to true if you have a Nerd Font installed and selected in the terminal
-vim.g.have_nerd_font = true
+vim.g.have_nerd_font = false
 
 -- [[ Setting options ]]
 -- See `:help vim.opt`
@@ -797,7 +797,7 @@ require('lazy').setup({
           --['<CR>'] = cmp.mapping.confirm { select = true },
           --['<Tab>'] = cmp.mapping.select_next_item(),
           --['<S-Tab>'] = cmp.mapping.select_prev_item(),
-          --
+
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
           --  completions whenever it has completion options available.
@@ -1417,44 +1417,3 @@ vim.keymap.set('n', '<leader>aU', '<cmd>ArduinoUploadAndSerial<cr>', { desc = 'u
 vim.keymap.set('n', '<leader>as', '<cmd>ArduinoSerial<cr>', { desc = 'open serial monitor' })
 vim.keymap.set('n', '<leader>ab', '<cmd>ArduinoChooseBoard<cr>', { desc = 'choose board' })
 vim.keymap.set('n', '<leader>ap', '<cmd>ArduinoChooseProgrammer<cr>', { desc = 'choose programmer' })
-
--- Autocmd
---
--- Auto hot reload on save for Dart files
-vim.api.nvim_create_autocmd('BufWritePost', {
-  pattern = '*.dart',
-  callback = function()
-    local ok, flutter_tools = pcall(require, 'flutter-tools')
-    if ok then
-      flutter_tools.reload() -- this does hot reload
-    end
-  end,
-})
-
--- THis is a zettelkasten plugin
-
-vim.keymap.set('n', '<leader>nn', function()
-  -- Ask user for note name
-  local name = vim.fn.input 'Note name: '
-  if name == '' then
-    print 'Aborted: no name given'
-    return
-  end
-
-  -- Clean name: lowercase, replace spaces with dashes
-  name = string.gsub(string.lower(name), '%s+', '-')
-
-  -- Build filename: date-name.tex
-  local date = os.date '%Y-%m-%d'
-  local cwd = vim.fn.getcwd()
-  local filepath = cwd .. '/' .. date .. '-' .. name .. '.tex'
-
-  -- Copy template if file doesn’t exist
-  if vim.fn.filereadable(filepath) == 0 then
-    local template = vim.fn.expand '~/git/Clase/template/template.tex'
-    vim.fn.system('cp ' .. template .. ' ' .. filepath)
-  end
-
-  -- Open file
-  vim.cmd('edit ' .. filepath)
-end, { desc = 'New daily note' })
