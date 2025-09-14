@@ -1173,7 +1173,15 @@ local config = {
     lualine_z = {},
     -- These will be filled later
     lualine_c = {},
-    lualine_x = {},
+    lualine_x = {
+      {
+        function()
+          return vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
+        end,
+        icon = '', -- folder icon
+        color = { fg = colors.blue },
+      },
+    },
   },
   inactive_sections = {
     -- these are to remove the defaults
@@ -1297,6 +1305,9 @@ ins_left {
 --   icons_enabled = false, -- I think icons are cool but Eviline doesn't have them. sigh
 --   color = { fg = colors.green, gui = 'bold' },
 -- }
+
+local note_status = require 'note_status'
+ins_right { note_status.status }
 
 ins_right {
   'branch',
@@ -1432,29 +1443,186 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 })
 
 -- THis is a zettelkasten plugin
-
 vim.keymap.set('n', '<leader>nn', function()
-  -- Ask user for note name
   local name = vim.fn.input 'Note name: '
   if name == '' then
     print 'Aborted: no name given'
     return
   end
+  name = string.gsub(string.lower(name), '%s+', '-') -- slugify
 
-  -- Clean name: lowercase, replace spaces with dashes
-  name = string.gsub(string.lower(name), '%s+', '-')
-
-  -- Build filename: date-name.tex
   local date = os.date '%Y-%m-%d'
-  local cwd = vim.fn.getcwd()
-  local filepath = cwd .. '/' .. date .. '-' .. name .. '.tex'
+  local parent = vim.fn.getcwd()
 
-  -- Copy template if file doesn’t exist
-  if vim.fn.filereadable(filepath) == 0 then
+  -- Walk up until folder has no .tex
+  local function find_free_folder(dir)
+    local tex_files = vim.fn.globpath(dir, '*.tex', false, true)
+    if #tex_files == 0 then
+      return dir
+    end
+    local parent_dir = vim.fn.fnamemodify(dir, ':h')
+    if parent_dir == dir then
+      return dir
+    end
+    return find_free_folder(parent_dir)
+  end
+
+  parent = find_free_folder(parent)
+
+  -- **Scan only subfolders of parent folder** to find highest existing number
+  local subfolders = vim.fn.glob(parent .. '/*', false, true)
+  local maxnum = 0
+  for _, f in ipairs(subfolders) do
+    if vim.fn.isdirectory(f) == 1 then
+      local num = tonumber(string.match(f, '(%d%d%d)%-'))
+      if num and num > maxnum then
+        maxnum = num
+      end
+    end
+  end
+
+  local newnum = string.format('%03d', maxnum + 1)
+  local folder = parent .. '/' .. newnum .. '-' .. date .. '-' .. name
+  local texfile = folder .. '/' .. newnum .. '-' .. date .. '-' .. name .. '.tex'
+
+  -- Create folder if missing
+  if vim.fn.isdirectory(folder) == 0 then
+    vim.fn.mkdir(folder, 'p')
+  end
+
+  -- Copy template
+  if vim.fn.filereadable(texfile) == 0 then
     local template = vim.fn.expand '~/git/Clase/template/template.tex'
-    vim.fn.system('cp ' .. template .. ' ' .. filepath)
+    vim.fn.system('cp ' .. template .. ' ' .. texfile)
+    print('Created note: ' .. texfile)
+  else
+    print('Opened existing note: ' .. texfile)
   end
 
   -- Open file
-  vim.cmd('edit ' .. filepath)
-end, { desc = 'New daily note' })
+  vim.cmd('edit ' .. texfile)
+end, { desc = 'New numbered Zettelkasten note in folder' })
+
+vim.api.nvim_create_autocmd('VimEnter', {
+  callback = function(data)
+    local arg = data.file
+
+    -- If Neovim starts with a directory
+    if arg ~= '' and vim.fn.isdirectory(arg) == 1 then
+      -- Set cwd to that directory
+      vim.cmd.cd(arg)
+
+      -- Open Alpha dashboard if available
+      if vim.fn.exists ':Alpha' == 2 then
+        vim.cmd 'Alpha'
+      else
+        vim.cmd.enew() -- fallback if Alpha isn't loaded
+      end
+    end
+  end,
+})
+
+-------------------------------------------------------------------------------
+--    incfig.nvim
+-------------------------------------------------------------------------------
+-- Git root helper
+local function git_root()
+  local file_dir = vim.fn.expand '%:p:h'
+  local cmd = string.format('cd %s && git rev-parse --show-toplevel 2>/dev/null', vim.fn.shellescape(file_dir))
+  local result = vim.fn.systemlist(cmd)[1]
+  if result and result ~= '' then
+    return result
+  end
+  return nil
+end
+
+-- Spawn Inkscape
+local function spawn_inkscape(file_path)
+  local script_path = vim.fn.expand '~/.config/nvim/inkscape_move_dynamic.sh'
+  vim.fn.jobstart({ script_path, file_path }, { detach = true })
+end
+
+-- Insert \incfig[size]{filename} with size prompt
+local function insert_incfig(filename)
+  vim.ui.input({ prompt = 'Enter size for \\incfig[size]{file} (0 < size <= 1): ' }, function(size)
+    if not size or size == '' then
+      return
+    end
+    local num = tonumber(size)
+    if not num or num <= 0 or num > 1 then
+      print 'Invalid size! Must be >0 and <=1'
+      return
+    end
+    local line = vim.api.nvim_win_get_cursor(0)[1]
+    vim.api.nvim_buf_set_lines(0, line, line, true, { string.format('\\incfig[%s]{%s}', num, filename) })
+  end)
+end
+
+-- Open/create SVG and optionally insert
+local function open_or_create_inkscape_svg()
+  vim.ui.input({ prompt = 'Inkscape file name: ' }, function(input)
+    if not input or input == '' then
+      return
+    end
+
+    local repo_root = git_root() or vim.fn.getcwd()
+    local images_dir = repo_root .. '/images'
+    vim.fn.mkdir(images_dir, 'p')
+    local file_path = images_dir .. '/' .. input .. '.svg'
+    local template_path = vim.fn.expand '~/git/Clase/templates-inkscape/cross.svg'
+
+    local function spawn_and_insert()
+      spawn_inkscape(file_path)
+      insert_incfig(input)
+    end
+
+    if vim.fn.filereadable(file_path) == 1 then
+      local options = {
+        'Open in Inkscape + insert \\incfig',
+        'Insert \\incfig only',
+        'Open in Inkscape only (edit, no insert)',
+        'Do nothing',
+      }
+      vim.ui.select(options, { prompt = 'File exists, choose action:' }, function(choice)
+        if not choice then
+          return
+        end
+        if choice == 'Open in Inkscape + insert \\incfig' then
+          spawn_and_insert()
+        elseif choice == 'Insert \\incfig only' then
+          insert_incfig(input)
+        elseif choice == 'Open in Inkscape only (edit, no insert)' then
+          spawn_inkscape(file_path)
+        end
+      end)
+    else
+      vim.fn.system { 'cp', template_path, file_path }
+      spawn_and_insert()
+    end
+  end)
+end
+
+-- Keymap
+vim.keymap.set('n', '<leader>i', open_or_create_inkscape_svg, { desc = 'Open/create Inkscape SVG + insert \\incfig' })
+
+-- Auto-export SVG -> PDF + PDF_TeX asynchronously
+local repo_root = git_root() or vim.fn.getcwd()
+local images_dir = repo_root .. '/images'
+
+vim.api.nvim_create_autocmd('BufWritePost', {
+  pattern = '*.svg',
+  callback = function(args)
+    local svg_file = args.file
+    if svg_file:sub(1, #images_dir) == images_dir then
+      local pdf_file = svg_file:gsub('%.svg$', '.pdf')
+      vim.fn.jobstart {
+        'inkscape',
+        svg_file,
+        '--export-type=pdf',
+        '--export-latex',
+        '--export-filename=' .. pdf_file,
+      }
+    end
+  end,
+  desc = 'Auto-export SVG to PDF + PDF_TeX asynchronously on save',
+})

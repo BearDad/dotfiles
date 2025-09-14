@@ -1,0 +1,40 @@
+# Yazi config
+
+# Define open rules by MIME type or extension
+open = [
+  # Text & notes → Neovim
+  { run = 'nvim "$1"', desc = "Edit in nvim", for = "text/*" },
+  { run = 'nvim "$1"', desc = "Edit LaTeX in nvim", for = "*.tex" },
+  { run = 'nvim "$1"', desc = "Edit markdown in nvim", for = "*.md" },
+
+  # Folders → also Neovim (Alpha.nvim will show up, cwd set by autocmd)
+  { run = 'nvim "$1"', desc = "Open folder in nvim", for = "inode/directory" },
+
+  # PDFs → Zathura
+  { run = 'zathura "$1"', desc = "Open PDF", for = "*.pdf" },
+
+  # Images → Ristretto (or feh/sxiv if you prefer)
+  { run = 'ristretto "$1"', desc = "Open image", for = "image/*" },
+
+  # Videos → mpv
+  { run = 'mpv "$1"', desc = "Play video", for = "video/*" },
+
+  # Audio → mpv
+  { run = 'mpv "$1"', desc = "Play audio", for = "audio/*" },
+
+  # Fallback → xdg-open
+  { run = 'xdg-open "$1"', desc = "Open with default app" },
+]
+
+# Preview settings (optional)
+[preview]
+max_width = 120
+max_height = 40
+cache = true
+
+# UI tweaks
+[manager]
+sort_by = "name"
+sort_reverse = false
+sort_dir_first = true
+show_hidden = true
