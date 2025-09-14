@@ -1660,6 +1660,33 @@ local function in_math_mode()
   return count % 2 == 1
 end
 
+-- Replace the word under the cursor using startreplace
+local function replace_word_at_cursor(new_word)
+  local row = vim.fn.line '.'
+  local col = vim.fn.col '.'
+  local line = vim.fn.getline(row)
+
+  -- Find start of the current word
+  local start_col = col
+  while start_col > 1 and line:sub(start_col - 1, start_col - 1):match '[%w_]' do
+    start_col = start_col - 1
+  end
+
+  -- Find end of the current word
+  local end_col = col
+  while end_col <= #line and line:sub(end_col, end_col):match '[%w_]' do
+    end_col = end_col + 1
+  end
+
+  -- Move cursor to start of word
+  vim.api.nvim_win_set_cursor(0, { row, start_col - 1 })
+  -- Use normal command to change the word
+  vim.cmd('normal! c' .. (end_col - start_col) .. 'l')
+  -- Feed replacement text and startreplace for correct cursor placement
+  vim.api.nvim_feedkeys(new_word, 'n', false)
+  vim.cmd 'startreplace'
+end
+
 -- Core function to correct a spelling error, with direction and wrap
 local function correct_spell(direction)
   local normal_cmd = (direction == 'next') and ']s' or '[s'
@@ -1669,7 +1696,6 @@ local function correct_spell(direction)
 
   -- If inside LaTeX command or math, try wrapping
   if in_latex_command() or in_math_mode() then
-    -- Wrap to start/end of buffer depending on direction
     if direction == 'next' then
       vim.cmd 'normal! gg' -- jump to top
       vim.cmd 'normal! ]s'
@@ -1678,7 +1704,6 @@ local function correct_spell(direction)
       vim.cmd 'normal! [s'
     end
     word = vim.fn.expand '<cword>'
-    -- still skip if it’s a LaTeX command/math
     if in_latex_command() or in_math_mode() then
       return
     end
@@ -1687,7 +1712,7 @@ local function correct_spell(direction)
   -- Correct the word if suggestions exist
   local suggestions = vim.fn.spellsuggest(word)
   if #suggestions > 0 then
-    vim.cmd('normal! ciw' .. suggestions[1])
+    replace_word_at_cursor(suggestions[1])
   end
 end
 
@@ -1695,21 +1720,18 @@ end
 local function correct_spell_next()
   correct_spell 'next'
 end
+
 local function correct_spell_prev()
   correct_spell 'prev'
 end
 
--- Insert mode mappings
+-- Insert mode mappings: Ctrl+J = previous, Ctrl+K = next
 vim.keymap.set('i', '<C-j>', function()
-  vim.cmd 'stopinsert'
-  correct_spell_prev() -- Ctrl+J = previous
-  vim.cmd 'startinsert'
+  correct_spell_prev()
 end, { noremap = true, silent = true })
 
 vim.keymap.set('i', '<C-k>', function()
-  vim.cmd 'stopinsert'
-  correct_spell_next() -- Ctrl+K = next
-  vim.cmd 'startinsert'
+  correct_spell_next()
 end, { noremap = true, silent = true })
 
 -- Normal mode mappings
