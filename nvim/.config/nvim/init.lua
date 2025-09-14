@@ -1626,3 +1626,92 @@ vim.api.nvim_create_autocmd('BufWritePost', {
   end,
   desc = 'Auto-export SVG to PDF + PDF_TeX asynchronously on save',
 })
+
+--- Spell checking
+---
+-- Enable spell checking
+vim.opt_local.spell = true
+vim.opt_local.spelllang = { 'es', 'en_us' }
+
+-- Helper: check if cursor is inside a LaTeX command (\foo)
+local function in_latex_command()
+  local line = vim.fn.getline '.'
+  local col = vim.fn.col '.'
+  local prefix = line:sub(1, col - 1)
+  local last_backslash = prefix:match '.*()\\'
+  if last_backslash then
+    local command = prefix:sub(last_backslash + 1)
+    if command:match '^%a*$' then
+      return true
+    end
+  end
+  return false
+end
+
+-- Helper: check if cursor is inside math mode ($...$)
+local function in_math_mode()
+  local line = vim.fn.getline '.'
+  local col = vim.fn.col '.'
+  local before = line:sub(1, col - 1)
+  local count = 0
+  for _ in before:gmatch '%$' do
+    count = count + 1
+  end
+  return count % 2 == 1
+end
+
+-- Core function to correct a spelling error, with direction and wrap
+local function correct_spell(direction)
+  local normal_cmd = (direction == 'next') and ']s' or '[s'
+  vim.cmd('normal! ' .. normal_cmd)
+
+  local word = vim.fn.expand '<cword>'
+
+  -- If inside LaTeX command or math, try wrapping
+  if in_latex_command() or in_math_mode() then
+    -- Wrap to start/end of buffer depending on direction
+    if direction == 'next' then
+      vim.cmd 'normal! gg' -- jump to top
+      vim.cmd 'normal! ]s'
+    else
+      vim.cmd 'normal! G' -- jump to bottom
+      vim.cmd 'normal! [s'
+    end
+    word = vim.fn.expand '<cword>'
+    -- still skip if it’s a LaTeX command/math
+    if in_latex_command() or in_math_mode() then
+      return
+    end
+  end
+
+  -- Correct the word if suggestions exist
+  local suggestions = vim.fn.spellsuggest(word)
+  if #suggestions > 0 then
+    vim.cmd('normal! ciw' .. suggestions[1])
+  end
+end
+
+-- Convenience wrappers
+local function correct_spell_next()
+  correct_spell 'next'
+end
+local function correct_spell_prev()
+  correct_spell 'prev'
+end
+
+-- Insert mode mappings
+vim.keymap.set('i', '<C-j>', function()
+  vim.cmd 'stopinsert'
+  correct_spell_prev() -- Ctrl+J = previous
+  vim.cmd 'startinsert'
+end, { noremap = true, silent = true })
+
+vim.keymap.set('i', '<C-k>', function()
+  vim.cmd 'stopinsert'
+  correct_spell_next() -- Ctrl+K = next
+  vim.cmd 'startinsert'
+end, { noremap = true, silent = true })
+
+-- Normal mode mappings
+vim.keymap.set('n', '<leader>sn', correct_spell_next, { noremap = true, silent = true })
+vim.keymap.set('n', '<leader>sp', correct_spell_prev, { noremap = true, silent = true })
