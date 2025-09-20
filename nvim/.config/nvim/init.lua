@@ -938,89 +938,63 @@ require('lazy').setup({
 -- vim: ts=2 sts=2 sw=2 et
 
 -- NOTE: addietions
-
-require('rose-pine').setup {
-  variant = 'main', -- auto, main, moon, or dawn
-  dark_variant = 'main', -- main, moon, or dawn
-  dim_inactive_windows = false,
-  extend_background_behind_borders = true,
-
-  enable = {
-    terminal = true,
-    legacy_highlights = true, -- Improve compatibility for previous versions of Neovim
-    migrations = true, -- Handle deprecated options automatically
+--
+--
+---- Default options:
+require('kanagawa').setup {
+  compile = false, -- enable compiling the colorscheme
+  undercurl = true, -- enable undercurls
+  commentStyle = { italic = true },
+  functionStyle = {},
+  keywordStyle = { italic = true },
+  statementStyle = { bold = true },
+  typeStyle = {},
+  transparent = true, -- do not set background color
+  dimInactive = true, -- dim inactive window `:h hl-NormalNC`
+  terminalColors = true, -- define vim.g.terminal_color_{0,17}
+  colors = { -- add/modify theme and palette colors
+    palette = {},
+    theme = { wave = {}, lotus = {}, dragon = {}, all = {
+      ui = {
+        bg_gutter = 'none',
+      },
+    } },
   },
+  overrides = function(colors)
+    local theme = colors.theme
+    return {
+      NormalFloat = { bg = 'none' },
+      FloatBorder = { bg = 'none' },
+      FloatTitle = { bg = 'none' },
 
-  styles = {
-    bold = true,
-    italic = true,
-    transparency = true,
-  },
+      -- Save an hlgroup with dark background and dimmed foreground
+      -- so that you can use it where your still want darker windows.
+      -- E.g.: autocmd TermOpen * setlocal winhighlight=Normal:NormalDark
+      NormalDark = { fg = theme.ui.fg_dim, bg = theme.ui.bg_m3 },
 
-  groups = {
-    border = 'muted',
-    link = 'iris',
-    panel = 'surface',
+      -- Popular plugins that open floats will link to NormalFloat by default;
+      -- set their background accordingly if you wish to keep them dark and borderless
+      LazyNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
+      MasonNormal = { bg = theme.ui.bg_m3, fg = theme.ui.fg_dim },
 
-    error = 'love',
-    hint = 'iris',
-    info = 'foam',
-    note = 'pine',
-    todo = 'rose',
-    warn = 'gold',
-
-    git_add = 'foam',
-    git_change = 'rose',
-    git_delete = 'love',
-    git_dirty = 'rose',
-    git_ignore = 'muted',
-    git_merge = 'iris',
-    git_rename = 'pine',
-    git_stage = 'iris',
-    git_text = 'rose',
-    git_untracked = 'subtle',
-
-    h1 = 'iris',
-    h2 = 'foam',
-    h3 = 'rose',
-    h4 = 'gold',
-    h5 = 'pine',
-    h6 = 'foam',
-  },
-
-  palette = {
-    -- Override the builtin palette per variant
-    moon = {
-      base = '#18191a',
-      overlay = '#363738',
-    },
-  },
-
-  highlight_groups = {
-    Comment = { fg = 'foam' },
-    VertSplit = { fg = 'muted', bg = 'muted' },
-  },
-
-  before_highlight = function(group, highlight, palette)
-    -- Disable all undercurls
-    -- if highlight.undercurl then
-    --     highlight.undercurl = false
-    -- end
-    --
-    -- Change palette colour
-    -- if highlight.fg == palette.pine then
-    --     highlight.fg = palette.foam
-    -- end
+      TelescopeTitle = { fg = theme.ui.special, bold = true },
+      TelescopePromptNormal = { bg = theme.ui.bg_p1 },
+      TelescopePromptBorder = { fg = theme.ui.bg_p1, bg = theme.ui.bg_p1 },
+      TelescopeResultsNormal = { fg = theme.ui.fg_dim, bg = theme.ui.bg_m1 },
+      TelescopeResultsBorder = { fg = theme.ui.bg_m1, bg = theme.ui.bg_m1 },
+      TelescopePreviewNormal = { bg = theme.ui.bg_dim },
+      TelescopePreviewBorder = { bg = theme.ui.bg_dim, fg = theme.ui.bg_dim },
+    }
   end,
+  theme = 'dragon', -- Load "wave" theme
+  background = { -- map the value of 'background' option to a theme
+    dark = 'dragon', -- try "dragon" !
+    light = 'lotus',
+  },
 }
 
-vim.cmd 'colorscheme rose-pine'
--- vim.cmd("colorscheme rose-pine-main")
--- vim.cmd("colorscheme rose-pine-moon")
--- vim.cmd("colorscheme rose-pine-dawn")
---
---
---
+-- setup must be called before loading
+vim.cmd 'colorscheme kanagawa'
 --
 --
 -- NOTE: This are my personal keybinds
@@ -1382,24 +1356,6 @@ vim.opt.conceallevel = 2
 --
 --
 --
-require('noice').setup {
-  lsp = {
-    -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
-    override = {
-      ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
-      ['vim.lsp.util.stylize_markdown'] = true,
-      ['cmp.entry.get_documentation'] = true, -- requires hrsh7th/nvim-cmp
-    },
-  },
-  -- you can enable a preset for easier configuration
-  presets = {
-    bottom_search = true, -- use a classic bottom cmdline for search
-    command_palette = true, -- position the cmdline and popupmenu together
-    long_message_to_split = true, -- long messages will be sent to a split
-    inc_rename = false, -- enables an input dialog for inc-rename.nvim
-    lsp_doc_border = false, -- add a border to hover docs and signature help
-  },
-}
 
 require('supermaven-nvim').setup {
   keymaps = {
