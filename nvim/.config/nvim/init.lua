@@ -1002,7 +1002,7 @@ vim.cmd 'colorscheme kanagawa'
 --
 vim.g.vimtex_view_method = 'zathura'
 vim.g.vimtex_compiler_method = 'latexmk'
---
+
 vim.opt.guicursor = 'a:block'
 vim.keymap.set('n', '<leader>e', '<cmd>Telescope emoji<cr>', { desc = 'Open NerdIcons' })
 vim.cmd [[
@@ -1479,8 +1479,20 @@ vim.api.nvim_create_autocmd('VimEnter', {
 })
 
 -------------------------------------------------------------------------------
---    incfig.nvim
+--    incfig.nvim (Telescope fuzzy search version)
 -------------------------------------------------------------------------------
+local has_telescope, telescope = pcall(require, 'telescope')
+if not has_telescope then
+  vim.notify('Telescope not found!', vim.log.levels.WARN)
+  return
+end
+
+local actions = require 'telescope.actions'
+local action_state = require 'telescope.actions.state'
+local pickers = require 'telescope.pickers'
+local finders = require 'telescope.finders'
+local conf = require('telescope.config').values
+
 -- Git root helper
 local function git_root()
   local file_dir = vim.fn.expand '%:p:h'
@@ -1514,53 +1526,73 @@ local function insert_incfig(filename)
   end)
 end
 
--- Open/create SVG and optionally insert
+-- Open/create SVG with Telescope fuzzy search
 local function open_or_create_inkscape_svg()
-  vim.ui.input({ prompt = 'Inkscape file name: ' }, function(input)
-    if not input or input == '' then
-      return
-    end
+  local repo_root = git_root() or vim.fn.getcwd()
+  local images_dir = repo_root .. '/images'
+  vim.fn.mkdir(images_dir, 'p')
 
-    local repo_root = git_root() or vim.fn.getcwd()
-    local images_dir = repo_root .. '/images'
-    vim.fn.mkdir(images_dir, 'p')
-    local file_path = images_dir .. '/' .. input .. '.svg'
-    local template_path = vim.fn.expand '~/git/Clase/templates-inkscape/cross.svg'
+  local svg_files = vim.fn.globpath(images_dir, '*.svg', false, true)
+  local filenames = {}
+  for _, path in ipairs(svg_files) do
+    table.insert(filenames, vim.fn.fnamemodify(path, ':t:r')) -- base name without extension
+  end
+  table.insert(filenames, '▶ New file') -- option to create a new one
 
-    local function spawn_and_insert()
-      spawn_inkscape(file_path)
-      insert_incfig(input)
-    end
+  pickers
+    .new({}, {
+      prompt_title = 'Select or create SVG',
+      finder = finders.new_table { results = filenames },
+      sorter = conf.generic_sorter {},
+      attach_mappings = function(prompt_bufnr, map)
+        actions.select_default:replace(function()
+          local selection = action_state.get_selected_entry()
+          actions.close(prompt_bufnr)
 
-    if vim.fn.filereadable(file_path) == 1 then
-      local options = {
-        'Open in Inkscape + insert \\incfig',
-        'Insert \\incfig only',
-        'Open in Inkscape only (edit, no insert)',
-        'Do nothing',
-      }
-      vim.ui.select(options, { prompt = 'File exists, choose action:' }, function(choice)
-        if not choice then
-          return
-        end
-        if choice == 'Open in Inkscape + insert \\incfig' then
-          spawn_and_insert()
-        elseif choice == 'Insert \\incfig only' then
-          insert_incfig(input)
-        elseif choice == 'Open in Inkscape only (edit, no insert)' then
-          spawn_inkscape(file_path)
-        end
-      end)
-    else
-      vim.fn.system { 'cp', template_path, file_path }
-      spawn_and_insert()
-    end
-  end)
+          local template_path = vim.fn.expand '~/git/Clase/templates-inkscape/cross.svg'
+
+          if selection[1] == '▶ New file' then
+            vim.ui.input({ prompt = 'Enter new SVG file name: ' }, function(input)
+              if not input or input == '' then
+                return
+              end
+              local file_path = images_dir .. '/' .. input .. '.svg'
+              vim.fn.system { 'cp', template_path, file_path }
+              spawn_inkscape(file_path)
+              insert_incfig(input)
+            end)
+          else
+            local filename = selection[1]
+            local file_path = images_dir .. '/' .. filename .. '.svg'
+            local options = {
+              'Open in Inkscape + insert \\incfig',
+              'Insert \\incfig only',
+              'Open in Inkscape only (edit, no insert)',
+              'Do nothing',
+            }
+            vim.ui.select(options, { prompt = 'File exists, choose action:' }, function(opt)
+              if not opt then
+                return
+              end
+              if opt == 'Open in Inkscape + insert \\incfig' then
+                spawn_inkscape(file_path)
+                insert_incfig(filename)
+              elseif opt == 'Insert \\incfig only' then
+                insert_incfig(filename)
+              elseif opt == 'Open in Inkscape only (edit, no insert)' then
+                spawn_inkscape(file_path)
+              end
+            end)
+          end
+        end)
+        return true
+      end,
+    })
+    :find()
 end
 
 -- Keymap
-vim.keymap.set('n', '<leader>i', open_or_create_inkscape_svg, { desc = 'Open/create Inkscape SVG + insert \\incfig' })
-
+vim.keymap.set('n', '<leader>i', open_or_create_inkscape_svg, { desc = 'Open/create Inkscape SVG + insert \\incfig (fuzzy)' })
 -- Auto-export SVG -> PDF + PDF_TeX asynchronously
 local repo_root = git_root() or vim.fn.getcwd()
 local images_dir = repo_root .. '/images'

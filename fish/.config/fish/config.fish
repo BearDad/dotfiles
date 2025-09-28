@@ -4,6 +4,14 @@ set -g fish_greeting
 #and not set -q TMUX
 # exec tmux
 #end
+
+if not set -q SSH_AGENT_PID
+    eval (ssh-agent -c)
+    ssh-add ~/.ssh/id_ed25519
+end
+clear
+
+
 if status is-interactive
     #exported paths
 
