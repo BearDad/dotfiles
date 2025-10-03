@@ -1529,7 +1529,14 @@ end
 -- Open/create SVG with Telescope fuzzy search
 local function open_or_create_inkscape_svg()
   local repo_root = git_root() or vim.fn.getcwd()
+  print('raw repo_root:', vim.inspect(repo_root)) -- debug
+
+  -- sanitize repo_root
+  repo_root = repo_root:gsub('\27%[[%d;]*[A-Za-z]', ''):gsub('%c', ''):gsub('^%s+', ''):gsub('%s+$', '')
+  print('clean repo_root:', vim.inspect(repo_root)) -- debug
+
   local images_dir = repo_root .. '/images'
+
   vim.fn.mkdir(images_dir, 'p')
 
   local svg_files = vim.fn.globpath(images_dir, '*.svg', false, true)
@@ -1550,6 +1557,9 @@ local function open_or_create_inkscape_svg()
           actions.close(prompt_bufnr)
 
           local template_path = vim.fn.expand '~/git/Clase/templates-inkscape/cross.svg'
+          if not selection then
+            return
+          end
 
           if selection[1] == '▶ New file' then
             vim.ui.input({ prompt = 'Enter new SVG file name: ' }, function(input)
@@ -1622,7 +1632,11 @@ vim.opt_local.spell = true
 vim.opt_local.spelllang = { 'es', 'en_us' }
 
 vim.keymap.set('i', '<C-j>', function()
-  vim.cmd 'stopinsert' -- temporarily leave insert mode
-  vim.cmd 'normal! [s' -- jump to previous spelling error
-  vim.api.nvim_feedkeys('z=1<CR>', 'n', false) -- pick first suggestion
+  vim.cmd 'stopinsert'
+  vim.cmd 'normal! [s'
+  vim.cmd 'normal! 1z='
+  vim.schedule(function()
+    vim.cmd 'normal! e'
+    vim.api.nvim_feedkeys('a ', 'n', false)
+  end)
 end, { noremap = true, silent = true })

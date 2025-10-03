@@ -1,4 +1,5 @@
 set -g fish_greeting
+set -gx GTK_IM_MODULE simple
 
 #if status is-interactive
 #and not set -q TMUX
@@ -61,6 +62,7 @@ if status is-interactive
     alias lg="lazygit"
     # oh-my-posh init fish --config ~/tokyonight.toml | source
 end
+
 
 set -Ux FZF_DEFAULT_OPTS "
 	--color=fg:$subtle,bg:$base,hl:$rose
