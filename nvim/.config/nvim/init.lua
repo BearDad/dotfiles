@@ -1003,38 +1003,21 @@ vim.cmd 'colorscheme kanagawa'
 vim.g.vimtex_view_method = 'zathura'
 vim.g.vimtex_compiler_method = 'latexmk'
 
-vim.opt.guicursor = 'a:block'
-vim.keymap.set('n', '<leader>e', '<cmd>Telescope emoji<cr>', { desc = 'Open NerdIcons' })
+vim.keymap.set('n', '<leader>ee', '<cmd>Telescope emoji<cr>', { desc = 'Open NerdIcons' })
 vim.cmd [[
   autocmd CmdwinEnter * q
 ]]
-
+vim.opt.guicursor = 'n-v-c:block,i-ci-ve:hor1-blinkon0'
 vim.keymap.set('n', '<leader>n', '<cmd>NerdIcons<cr>', { desc = 'Open NerdIcons' })
 vim.keymap.set({ 'n', 'v' }, '<C-p>', '"*p', { desc = 'Paste from selection clipboard' })
 vim.keymap.set({ 'n', 'v' }, 'p', '"+p', { desc = 'Paste from system clipboard' })
 vim.keymap.set({ 'v', 'n' }, '<leader>tt', '<cmd>TSBufToggle highlight<cr>', { desc = 'Toggle Tree-sitter highlighting' })
--- vim.keymap.set('n', '<leader>z', ":!zathura <C-r>=expand('%:r')<cr>.pdf &<cr>", { desc = 'Open PDF' })
--- the keybind above only works in wsl
+vim.keymap.set({ 'n', 'v', 'x' }, ';', ':')
+vim.keymap.set({ 'n', 'v', 'x' }, ':', ';')
 
-vim.keymap.set({ 'n' }, '<leader>p', function()
-  local file_name = vim.fn.expand '%:t'
-  if file_name ~= '' then
-    -- Open Explorer in the current directory and select the file
-    vim.fn.system { 'explorer.exe', '/select,', file_name }
-  else
-    print 'No file name found. Save the buffer first.'
-  end
-end, { desc = 'Open file location in Explorer' })
+vim.keymap.set({ 'x', 'n' }, '<C-s>', [[<esc>:'<,'>s/\V/]], { desc = 'Enter substitute mode' })
 
-vim.keymap.set({ 'n' }, '<leader>o', function()
-  local file_name = vim.fn.expand '%:t'
-  if file_name ~= '' then
-    -- Open Explorer in the current directory and select the file
-    vim.fn.system { 'explorer.exe', file_name }
-  else
-    print 'No file found. Make sure the buffer is saved.'
-  end
-end, { desc = 'Open file ' })
+--
 
 -- NOTE: THESE ARE FROM https://github.com/LazyVim/LazyVim/blob/main/lua/lazyvim/config/keymaps.lua
 
@@ -1050,10 +1033,10 @@ vim.keymap.set({ 'n', 'x' }, 'k', "v:count == 0 ? 'gk' : 'k'", { desc = 'Up', ex
 -- vim.keymap.set('n', '<C-l>', '<C-w>l', { desc = 'Go to Right Window', remap = true })
 
 vim.keymap.set('n', '<A-j>', "<cmd>execute 'move .+' . v:count1<cr>==", { desc = 'Move Down' })
-vim.keymap.set('n', '<A-k>', "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = 'Move Up' })
 vim.keymap.set('i', '<A-j>', '<esc><cmd>m .+1<cr>==gi', { desc = 'Move Down' })
-vim.keymap.set('i', '<A-k>', '<esc><cmd>m .-2<cr>==gi', { desc = 'Move Up' })
 vim.keymap.set('v', '<A-j>', ":<C-u>execute \"'<,'>move '>+\" . v:count1<cr>gv=gv", { desc = 'Move Down' })
+vim.keymap.set('n', '<A-k>', "<cmd>execute 'move .-' . (v:count1 + 1)<cr>==", { desc = 'Move Up' })
+vim.keymap.set('i', '<A-k>', '<esc><cmd>m .-2<cr>==gi', { desc = 'Move Up' })
 vim.keymap.set('v', '<A-k>', ":<C-u>execute \"'<,'>move '<-\" . (v:count1 + 1)<cr>gv=gv", { desc = 'Move Up' })
 
 -- better indenting
