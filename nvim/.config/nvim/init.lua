@@ -1616,10 +1616,5 @@ vim.opt_local.spelllang = { 'es', 'en_us' }
 
 vim.keymap.set('i', '<C-j>', function()
   vim.cmd 'stopinsert'
-  vim.cmd 'normal! [s'
-  vim.cmd 'normal! 1z='
-  vim.schedule(function()
-    vim.cmd 'normal! e'
-    vim.api.nvim_feedkeys('a ', 'n', false)
-  end)
+  vim.cmd 'normal! [s1z=`]a'
 end, { noremap = true, silent = true })
