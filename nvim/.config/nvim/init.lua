@@ -1589,7 +1589,7 @@ vim.keymap.set('n', '<leader>i', open_or_create_inkscape_svg, { desc = 'Open/cre
 -- Auto-export SVG -> PDF + PDF_TeX asynchronously
 local repo_root = git_root() or vim.fn.getcwd()
 local images_dir = repo_root .. '/images'
--- TODO: FIX THIS AUTOCMD: it does not export svg into PDF + PDF_TeX on save
+-- TODO: FIX THIS AUTOCMD: it does not export avg into PDF + PDF_TeX on save
 vim.api.nvim_create_autocmd('BufWritePost', {
   pattern = '*.svg',
   callback = function(args)
@@ -1614,7 +1614,7 @@ vim.api.nvim_create_autocmd('BufWritePost', {
 vim.opt_local.spell = true
 vim.opt_local.spelllang = { 'es', 'en_us' }
 
-vim.keymap.set('i', '<C-j>', function()
+vim.keymap.set({ 'i', 'n' }, '<C-j>', function()
   vim.cmd 'stopinsert'
-  vim.cmd 'normal! [s1z=`]a'
+  vim.cmd 'normal! ma[s1z=`a'
 end, { noremap = true, silent = true })
