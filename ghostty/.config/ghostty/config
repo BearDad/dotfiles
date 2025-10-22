@@ -1,5 +1,6 @@
-theme = Kanagawa Dragon
+theme = Kanagawa Wave
 
-window-decoration = false
-background-opacity = 0.85
+window-decoration = true
+background-opacity = 1
 font-size = 10
+

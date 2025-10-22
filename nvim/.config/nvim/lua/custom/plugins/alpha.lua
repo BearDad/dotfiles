@@ -96,15 +96,19 @@ return {
     local adjustedLogo = logo .. '\n' .. paddedGreeting .. margin
 
     dashboard.section.buttons.val = {
-      dashboard.button('n', '  New file', ':ene <BAR> startinsert <CR>'),
+      dashboard.button('n', '  New file', ':ene <CR>'),
       dashboard.button('ff', '  Find file', ':cd $HOME | silent Telescope find_files hidden=true no_ignore=true <CR>'),
       dashboard.button('r', '󰄉  Recent files', ':Telescope oldfiles <CR>'),
       dashboard.button('u', '󱐥  Update plugins', '<cmd>Lazy update<CR>'),
-      -- dashboard.button('c', '  Settings', ':e $HOME/.config/nvim/init.lua<CR>'),
-      dashboard.button('p', '  Projects', ':e $HOME/git <CR>'),
-      -- dashboard.button('t', '  Clase', ':e $HOME/git/Clase/ <CR>'),
-      dashboard.button('d', '󱗼  Dotfiles', ':e $HOME/dotfiles <CR>'),
-      dashboard.button('q', '󰿅  Quit', '<cmd>qa<CR>'),
+      -- dashboard.button('c', '  Settings', ':Oil $HOME/.config/nvim/init.lua<CR>'),
+      -- dashboard.button('p', '  Projects', ':Oil $HOME/git <CR>'),
+      -- dashboard.button('t', '  Clase', ':Oil $HOME/git/Clase/ <CR>'),
+      --
+      -- dashboard.button('d', '󱗼  Dotfiles', function()
+      --   vim.api.nvim_buf_delete(0, { force = true })
+      --   vim.cmd 'Oil $HOME/dotfiles'
+      -- end),
+      -- dashboard.button('q', '󰿅  Quit', '<cmd>qa<CR>'),
     }
 
     -- local function footer()
@@ -113,18 +117,18 @@ return {
 
     dashboard.section.footer.val = vim.split('\n' .. getGreeting 'Lazy', '\n')
 
-    -- vim.api.nvim_create_autocmd('User', {
-    --   pattern = 'LazyVimStarted',
-    --   desc = 'Add Alpha dashboard footer',
-    --   once = true,
-    --   callback = function()
-    --     local stats = require('lazy').stats()
-    --     local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
-    --     dashboard.section.footer.val = { ' ', ' ', ' ', ' Loaded ' .. stats.count .. ' plugins  in ' .. ms .. ' ms ' }
-    --     dashboard.section.header.opts.hl = 'DashboardFooter'
-    --     pcall(vim.cmd.AlphaRedraw)
-    --   end,
-    -- })
+    vim.api.nvim_create_autocmd('User', {
+      pattern = 'LazyVimStarted',
+      desc = 'Add Alpha dashboard footer',
+      once = true,
+      callback = function()
+        local stats = require('lazy').stats()
+        local ms = math.floor(stats.startuptime * 100 + 0.5) / 100
+        dashboard.section.footer.val = { ' ', ' ', ' ', ' Loaded ' .. stats.count .. ' plugins  in ' .. ms .. ' ms ' }
+        dashboard.section.header.opts.hl = 'DashboardFooter'
+        pcall(vim.cmd.AlphaRedraw)
+      end,
+    })
 
     dashboard.opts.opts.noautocmd = true
     alpha.setup(dashboard.opts)

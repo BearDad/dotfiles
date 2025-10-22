@@ -747,6 +747,21 @@ require('lazy').setup({
             'rafamadriz/friendly-snippets',
             config = function()
               require('luasnip.loaders.from_vscode').lazy_load()
+              require('luasnip.loaders.from_snipmate').lazy_load()
+              require('luasnip.loaders.from_lua').lazy_load()
+              require('luasnip').filetype_extend('typescript', { 'tsdoc' })
+              require('luasnip').filetype_extend('javascript', { 'jsdoc' })
+              require('luasnip').filetype_extend('lua', { 'luadoc' })
+              require('luasnip').filetype_extend('python', { 'pydoc' })
+              require('luasnip').filetype_extend('rust', { 'rustdoc' })
+              require('luasnip').filetype_extend('cs', { 'csharpdoc' })
+              require('luasnip').filetype_extend('java', { 'javadoc' })
+              require('luasnip').filetype_extend('c', { 'cdoc' })
+              require('luasnip').filetype_extend('cpp', { 'cppdoc' })
+              require('luasnip').filetype_extend('php', { 'phpdoc' })
+              require('luasnip').filetype_extend('kotlin', { 'kdoc' })
+              require('luasnip').filetype_extend('ruby', { 'rdoc' })
+              require('luasnip').filetype_extend('sh', { 'shelldoc' })
             end,
           },
         },
@@ -794,9 +809,9 @@ require('lazy').setup({
 
           -- If you prefer more traditional completion keymaps,
           -- you can uncomment the following lines
-          --['<CR>'] = cmp.mapping.confirm { select = true },
-          --['<Tab>'] = cmp.mapping.select_next_item(),
-          --['<S-Tab>'] = cmp.mapping.select_prev_item(),
+          ['<CR>'] = cmp.mapping.confirm { select = true },
+          ['<Tab>'] = cmp.mapping.select_next_item(),
+          ['<S-Tab>'] = cmp.mapping.select_prev_item(),
           --
           -- Manually trigger a completion from nvim-cmp.
           --  Generally you don't need this, because nvim-cmp will display
@@ -1015,7 +1030,7 @@ vim.keymap.set({ 'v', 'n' }, '<leader>tt', '<cmd>TSBufToggle highlight<cr>', { d
 vim.keymap.set({ 'n', 'v', 'x' }, ';', ':')
 vim.keymap.set({ 'n', 'v', 'x' }, ':', ';')
 
-vim.keymap.set({ 'x', 'n' }, '<C-s>', [[<esc>:'<,'>s/\V/]], { desc = 'Enter substitute mode' })
+vim.keymap.set({ 'x', 'n' }, '<C-s>', [[<esc>:'<,'>s/]], { desc = 'Enter substitute mode' })
 
 --
 
@@ -1381,7 +1396,6 @@ vim.api.nvim_create_autocmd('BufWritePost', {
   end,
 })
 
--- THis is a zettelkasten plugin
 vim.keymap.set('n', '<leader>nn', function()
   local name = vim.fn.input 'Note name: '
   if name == '' then
@@ -1391,37 +1405,42 @@ vim.keymap.set('n', '<leader>nn', function()
   name = string.gsub(string.lower(name), '%s+', '-') -- slugify
 
   local date = os.date '%Y-%m-%d'
-  local parent = vim.fn.getcwd()
+  local cwd = vim.fn.getcwd()
 
-  -- Walk up until folder has no .tex
-  local function find_free_folder(dir)
-    local tex_files = vim.fn.globpath(dir, '*.tex', false, true)
-    if #tex_files == 0 then
-      return dir
-    end
-    local parent_dir = vim.fn.fnamemodify(dir, ':h')
-    if parent_dir == dir then
-      return dir
-    end
-    return find_free_folder(parent_dir)
+  -- Detect notes dir: prefer chapters/ if exists, else cwd
+  local notes_dir = cwd .. '/chapters'
+  if vim.fn.isdirectory(notes_dir) == 0 then
+    notes_dir = cwd
   end
 
-  parent = find_free_folder(parent)
-
-  -- **Scan only subfolders of parent folder** to find highest existing number
-  local subfolders = vim.fn.glob(parent .. '/*', false, true)
-  local maxnum = 0
-  for _, f in ipairs(subfolders) do
-    if vim.fn.isdirectory(f) == 1 then
-      local num = tonumber(string.match(f, '(%d%d%d)%-'))
-      if num and num > maxnum then
-        maxnum = num
+  -- Get max number from all ###-... folders under notes_dir (recursive, maxdepth 3)
+  local function get_max_num(base_dir)
+    local max_num = 0
+    local find_cmd = string.format("find %s -maxdepth 3 -mindepth 1 -type d -name '[0-9][0-9][0-9]-*'", vim.fn.shellescape(base_dir))
+    local output = vim.fn.system(find_cmd)
+    if vim.v.shell_error ~= 0 then
+      print 'Warning: Could not scan for existing notes (using 001)'
+      return 0
+    end
+    for line in output:gmatch '([^\n\r]+)' do
+      line = line:gsub('^%s*(.-)%s*$', '%1') -- trim
+      if line ~= '' then
+        -- Extract ### from path (handles nested like chapters/001-...)
+        local num_str = string.match(line, '.*/(%d%d%d)-')
+        if num_str then
+          local num = tonumber(num_str)
+          if num and num > max_num then
+            max_num = num
+          end
+        end
       end
     end
+    return max_num
   end
 
+  local maxnum = get_max_num(notes_dir)
   local newnum = string.format('%03d', maxnum + 1)
-  local folder = parent .. '/' .. newnum .. '-' .. date .. '-' .. name
+  local folder = notes_dir .. '/' .. newnum .. '-' .. date .. '-' .. name
   local texfile = folder .. '/' .. newnum .. '-' .. date .. '-' .. name .. '.tex'
 
   -- Create folder if missing
@@ -1432,34 +1451,15 @@ vim.keymap.set('n', '<leader>nn', function()
   -- Copy template
   if vim.fn.filereadable(texfile) == 0 then
     local template = vim.fn.expand '~/git/Clase/template/template.tex'
-    vim.fn.system('cp ' .. template .. ' ' .. texfile)
+    vim.fn.system('cp ' .. vim.fn.shellescape(template) .. ' ' .. vim.fn.shellescape(texfile))
     print('Created note: ' .. texfile)
   else
     print('Opened existing note: ' .. texfile)
   end
 
   -- Open file
-  vim.cmd('edit ' .. texfile)
+  vim.cmd('edit ' .. vim.fn.escape(texfile, ' '))
 end, { desc = 'New numbered Zettelkasten note in folder' })
-
-vim.api.nvim_create_autocmd('VimEnter', {
-  callback = function(data)
-    local arg = data.file
-
-    -- If Neovim starts with a directory
-    if arg ~= '' and vim.fn.isdirectory(arg) == 1 then
-      -- Set cwd to that directory
-      vim.cmd.cd(arg)
-
-      -- Open Alpha dashboard if available
-      if vim.fn.exists ':Alpha' == 2 then
-        vim.cmd 'Alpha'
-      else
-        vim.cmd.enew() -- fallback if Alpha isn't loaded
-      end
-    end
-  end,
-})
 
 -------------------------------------------------------------------------------
 --    incfig.nvim (Telescope fuzzy search version)
