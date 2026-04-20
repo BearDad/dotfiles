@@ -11,7 +11,6 @@ return {
       skip_confirm_for_simple_edits = true,
       default_file_explorer = true,
       columns = { 'icon', 'permissions', 'size', 'mtime' }, -- Netrw-like columns
-      buf_options = { buftype = 'nowrite' }, -- Prevent accidental writes
       win_options = { winbar = '%f' }, -- Show path in winbar
       delete_to_trash = vim.fn.has 'mac' == 1, -- Trash on macOS
       view_options = {

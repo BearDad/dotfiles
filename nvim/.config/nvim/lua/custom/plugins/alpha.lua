@@ -100,15 +100,14 @@ return {
       dashboard.button('ff', '  Find file', ':cd $HOME | silent Telescope find_files hidden=true no_ignore=true <CR>'),
       dashboard.button('r', '󰄉  Recent files', ':Telescope oldfiles <CR>'),
       dashboard.button('u', '󱐥  Update plugins', '<cmd>Lazy update<CR>'),
-      -- dashboard.button('c', '  Settings', ':Oil $HOME/.config/nvim/init.lua<CR>'),
-      -- dashboard.button('p', '  Projects', ':Oil $HOME/git <CR>'),
-      -- dashboard.button('t', '  Clase', ':Oil $HOME/git/Clase/ <CR>'),
-      --
+      dashboard.button('c', '  Settings', ':Oil ' .. vim.env.HOME .. '/.config/nvim/init.lua<CR>'),
+      dashboard.button('p', '  Projects', ':Oil ' .. vim.env.HOME .. '/git<CR>'),
+      dashboard.button('t', ' Clase', ':Oil ' .. vim.env.HOME .. '/git/Clase/<CR>'),
       -- dashboard.button('d', '󱗼  Dotfiles', function()
       --   vim.api.nvim_buf_delete(0, { force = true })
       --   vim.cmd 'Oil $HOME/dotfiles'
       -- end),
-      -- dashboard.button('q', '󰿅  Quit', '<cmd>qa<CR>'),
+      dashboard.button('q', '󰿅  Quit', '<cmd>qa<CR>'),
     }
 
     -- local function footer()

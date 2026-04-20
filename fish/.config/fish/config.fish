@@ -1,5 +1,20 @@
 set -g fish_greeting
-set -gx GTK_IM_MODULE simple
+set -gx GTK_IM_MODULE fcitx
+set -gx QT_IM_MODULE fcitx
+set -gx XMODIFIERS @im=fcitx
+set -gx SDL_IM_MODULE fcitx
+set -gx INPUT_METHOD fcitx
+set -Ux OLLAMA_API_BASE http://127.0.0.1:11434
+set -U fish_user_paths $fish_user_paths ~/go/bin
+set -x MANGOHUD 1
+set -x SUDO_EDITOR nvim
+set -x SYSTEMD_EDITOR nvim
+set -x EDITOR nvim
+
+
+
+# Library paths for matlab
+# set -gx LD_LIBRARY_PATH /usr/lib/gnutls3.8.9 $LD_LIBRARY_PATH
 
 #if status is-interactive
 #and not set -q TMUX
@@ -26,6 +41,7 @@ if status is-interactive
     
     export PATH="$PATH:/usr/local/texlive/2024/bin/x86_64-linux/tlmgr"
 
+
 export PATH="$PATH:/usr/local/bin/node"
     # alias vim="nvim"
 end
@@ -46,7 +62,7 @@ if status is-interactive
     alias t="tmux"
     alias td="tmux detach"
     alias py="python3"
-    alias python="python3"
+    # alias python="python3"
     alias cat="bat"
     alias c="clear"
     alias l="eza"
@@ -60,6 +76,7 @@ if status is-interactive
     alias gwip="git commit -m 'Work In Progress'"
     alias v="nvim"
     alias lg="lazygit"
+    alias gbd="git branch --merged | grep -v "\*" | xargs -n 1 git branch -d"
     # oh-my-posh init fish --config ~/tokyonight.toml | source
 end
 
@@ -87,6 +104,35 @@ function y
     end
     rm -f -- "$tmp"
 end
+
+
+
+# Start a D-Bus session if not already running
+if not set -q DBUS_SESSION_BUS_ADDRESS
+    eval (dbus-launch --sh-syntax)
+end
+
+if status is-login
+    if test (tty) = /dev/tty1
+    if not set -q GNOME_KEYRING_CONTROL
+        for line in (gnome-keyring-daemon --start --components=pkcs11,secrets,ssh)
+            set var (string split "=" $line)[1]
+            set val (string split "=" $line)[2..-1]
+            set -gx $var $val
+        end
+    end
+        if not set -q WAYLAND_DISPLAY
+            
+	    exec uwsm start start-hyprland
+
+        end
+    end
+end
+
+
+
+
+
 cd ~/
 starship init fish | source
 enable_transience

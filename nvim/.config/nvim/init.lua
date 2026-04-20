@@ -467,7 +467,7 @@ require('lazy').setup({
 
       -- Useful status updates for LSP.
       -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-      { 'j-hui/fidget.nvim', opts = {} },
+      { 'j-hui/fidget.nvim', lazy = false, opts = {} },
 
       -- Allows extra capabilities provided by nvim-cmp
       'hrsh7th/cmp-nvim-lsp',
@@ -558,7 +558,7 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -585,7 +585,7 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
@@ -619,6 +619,45 @@ require('lazy').setup({
       --  - capabilities (table): Override fields in capabilities. Can be used to disable certain LSP features.
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
+      vim.lsp.config('gdscript', {
+        cmd = vim.lsp.rpc.connect('127.0.0.1', 6005),
+        filetypes = { 'gdscript' },
+        root_dir = vim.fs.root(0, { 'project.godot', '.git' }),
+      })
+      vim.lsp.enable 'gdscript'
+
+      vim.lsp.config('basedpyright', {
+        settings = {
+          basedpyright = {
+            analysis = {
+              typeCheckingMode = 'standard',
+              autoSearchPaths = true,
+              useLibraryCodeForTypes = true,
+              autoImportCompletions = true,
+              diagnosticMode = 'workspace', -- sobreescribe el "openFilesOnly" del default
+            },
+          },
+        },
+      })
+
+      vim.lsp.enable 'basedpyright'
+
+      vim.lsp.config('arduino_language_server', {
+        cmd = {
+          'arduino-language-server',
+          '-clangd',
+          vim.fn.exepath 'clangd',
+          '-cli',
+          vim.fn.exepath 'arduino-cli',
+          '-cli-config',
+          vim.fn.expand '~/.arduino15/arduino-cli.yaml',
+          '-fqbn',
+          'arduino:avr:mega',
+        },
+      })
+
+      vim.lsp.enable 'arduino_language_server'
+
       local servers = {
         -- clangd = {},
         -- gopls = {},
@@ -673,10 +712,13 @@ require('lazy').setup({
             -- by the server configuration above. Useful when disabling
             -- certain features of an LSP (for example, turning off formatting for ts_ls)
             server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
+            vim.lsp.config(server_name, server)
+            vim.lsp.enable(server_name)
           end,
         },
       }
+      -- GDScript (Godot 4) — el servidor está integrado en Godot, no en Mason
+      -- Godot debe estar abierto con el proyecto para que el LSP funcione
     end,
   },
 
@@ -1081,234 +1123,10 @@ end
 
 vim.keymap.set('n', '<leader>cr', function()
   return ':IncRename ' .. vim.fn.expand '<cword>'
-end, { expr = true })
+end, { expr = true, desc = 'Rename' })
 
 -- NOTE: END OF LINE CHARS
 vim.opt.fillchars = { eob = ' ' }
--- NOTE: LULALINE CONFIG
---
---
-local lualine = require 'lualine'
-
--- Color table for highlights
--- stylua: ignore
-local colors = {
-  bg       = '#191724',
-  fg       = '#26233a',
-  yellow   = '#f6c177',
-  cyan     = '#9ccfd8',
-  darkblue = '#31748f',
-  green    = '#31748f',
-  orange   = '#ebbcba',
-  violet   = '#c4a7e7',
-  magenta  = '#c4a7e7',
-  blue     = '#31748f',
-  red      = 'eb6f92',
-}
-
-local conditions = {
-  buffer_not_empty = function()
-    return vim.fn.empty(vim.fn.expand '%:t') ~= 1
-  end,
-  hide_in_width = function()
-    return vim.fn.winwidth(0) > 80
-  end,
-  check_git_workspace = function()
-    local filepath = vim.fn.expand '%:p:h'
-    local gitdir = vim.fn.finddir('.git', filepath .. ';')
-    return gitdir and #gitdir > 0 and #gitdir < #filepath
-  end,
-}
-
--- Config
---
---
-
-local config = {
-  options = {
-    -- Disable sections and component separators
-    component_separators = '',
-    section_separators = '',
-    theme = {
-      -- We are going to use lualine_c an lualine_x as left and
-      -- right section. Both are highlighted by c theme .  So we
-      -- are just setting default looks o statusline
-      normal = { c = { fg = colors.fg, bg = colors.bg } },
-      inactive = { c = { fg = colors.fg, bg = colors.bg } },
-    },
-  },
-  sections = {
-    -- these are to remove the defaults
-    lualine_a = {},
-    lualine_b = {},
-    lualine_y = {},
-    lualine_z = {},
-    -- These will be filled later
-    lualine_c = {},
-    lualine_x = {
-      {
-        function()
-          return vim.fn.fnamemodify(vim.fn.getcwd(), ':t')
-        end,
-        icon = '', -- folder icon
-        color = { fg = colors.blue },
-      },
-    },
-  },
-  inactive_sections = {
-    -- these are to remove the defaults
-    lualine_a = {},
-    lualine_b = {},
-    lualine_y = {},
-    lualine_z = {},
-    lualine_c = {},
-    lualine_x = {},
-  },
-}
-
--- Inserts a component in lualine_c at left section
-local function ins_left(component)
-  table.insert(config.sections.lualine_c, component)
-end
-
--- Inserts a component in lualine_x at right section
-local function ins_right(component)
-  table.insert(config.sections.lualine_x, component)
-end
-
-ins_left {
-  function()
-    return '▊'
-  end,
-  color = { fg = colors.blue }, -- Sets highlighting of component
-  padding = { left = 0, right = 1 }, -- We don't need space before this
-}
-
-ins_left {
-  -- mode component
-  function()
-    return ''
-  end,
-  color = function()
-    -- auto change color according to neovims mode
-    local mode_color = {
-      n = colors.red,
-      i = colors.green,
-      v = colors.blue,
-      [''] = colors.blue,
-      V = colors.blue,
-      c = colors.magenta,
-      no = colors.red,
-      s = colors.orange,
-      S = colors.orange,
-      [''] = colors.orange,
-      ic = colors.yellow,
-      R = colors.violet,
-      Rv = colors.violet,
-      cv = colors.red,
-      ce = colors.red,
-      r = colors.cyan,
-      rm = colors.cyan,
-      ['r?'] = colors.cyan,
-      ['!'] = colors.red,
-      t = colors.red,
-    }
-    return { fg = mode_color[vim.fn.mode()] }
-  end,
-  padding = { right = 1 },
-}
-
-ins_left {
-  -- filesize component
-  'filesize',
-  cond = conditions.buffer_not_empty,
-  color = { fg = colors.yellow },
-}
-
-ins_left {
-  'filename',
-  cond = conditions.buffer_not_empty,
-  color = { fg = colors.magenta, gui = 'bold' },
-}
-
-ins_left { 'location', color = { fg = colors.yellow } }
-
--- Insert mid section. You can make any number of sections in neovim :)
--- for lualine it's any number greater then 2
-ins_left {
-  function()
-    return '%='
-  end,
-}
-
-ins_left {
-  icon = ' LSP:',
-  color = { fg = '#ffffff', gui = 'bold' },
-  'filetype',
-  -- -- Lsp server name .
-  -- function()
-  --   local msg = 'No Active Lsp'
-  --   local buf_ft = vim.api.nvim_get_option_value('filetype', { buf = 0 })
-  --   local clients = vim.lsp.get_clients()
-  --   if next(clients) == nil then
-  --     return msg
-  --   end
-  --   for _, client in ipairs(clients) do
-  --     local filetypes = client.config.filetypes
-  --     if filetypes and vim.fn.index(filetypes, buf_ft) ~= -1 then
-  --       return client.name
-  --     end
-  --   end
-  --   return msg
-  -- end,
-}
-
--- Add components to right sections
--- ins_right {
---   'o:encoding', -- option component same as &encoding in viml
---   fmt = string.upper, -- I'm not sure why it's upper case either ;)
---   cond = conditions.hide_in_width,
---   color = { fg = colors.green, gui = 'bold' },
--- }
-
--- ins_right {
---   'fileformat',
---   fmt = string.upper,
---   icons_enabled = false, -- I think icons are cool but Eviline doesn't have them. sigh
---   color = { fg = colors.green, gui = 'bold' },
--- }
-
-local note_status = require 'note_status'
-ins_right { note_status.status }
-
-ins_right {
-  'branch',
-  icon = '',
-  color = { fg = colors.violet, gui = 'bold' },
-}
-
-ins_right {
-  'diff',
-  -- Is it me or the symbol for modified us really weird
-  symbols = { added = ' ', modified = '󰬊  ', removed = ' ' },
-  diff_color = {
-    added = { fg = colors.green },
-    modified = { fg = colors.orange },
-    removed = { fg = colors.red },
-  },
-  cond = conditions.hide_in_width,
-}
-
-ins_right {
-  function()
-    return '▊'
-  end,
-  color = { fg = colors.blue },
-  padding = { left = 1 },
-}
-
--- Now don't forget to initialize lualine
-lualine.setup(config)
 
 require('colorizer').setup {
   filetypes = { '*' },
@@ -1396,70 +1214,99 @@ vim.api.nvim_create_autocmd('BufWritePost', {
   end,
 })
 
+-- ZETTELKASTEN
+--
 vim.keymap.set('n', '<leader>nn', function()
   local name = vim.fn.input 'Note name: '
   if name == '' then
-    print 'Aborted: no name given'
+    print 'Aborted'
     return
   end
-  name = string.gsub(string.lower(name), '%s+', '-') -- slugify
+  name = string.lower(name):gsub('%s+', '-'):gsub('[^%w%-]', '')
 
   local date = os.date '%Y-%m-%d'
   local cwd = vim.fn.getcwd()
 
-  -- Detect notes dir: prefer chapters/ if exists, else cwd
-  local notes_dir = cwd .. '/chapters'
-  if vim.fn.isdirectory(notes_dir) == 0 then
-    notes_dir = cwd
+  -- Perfect base_dir (already correct in your version)
+  local base_dir = cwd
+  if vim.fn.isdirectory(cwd .. '/chapters') == 1 then
+    base_dir = cwd .. '/chapters'
+  elseif #vim.fn.glob(cwd .. '/*.tex', false, true) > 0 then
+    base_dir = vim.fn.fnamemodify(cwd, ':h')
+    print('Inside existing note → using parent:', base_dir)
   end
 
-  -- Get max number from all ###-... folders under notes_dir (recursive, maxdepth 3)
-  local function get_max_num(base_dir)
-    local max_num = 0
-    local find_cmd = string.format("find %s -maxdepth 3 -mindepth 1 -type d -name '[0-9][0-9][0-9]-*'", vim.fn.shellescape(base_dir))
-    local output = vim.fn.system(find_cmd)
-    if vim.v.shell_error ~= 0 then
-      print 'Warning: Could not scan for existing notes (using 001)'
-      return 0
-    end
-    for line in output:gmatch '([^\n\r]+)' do
-      line = line:gsub('^%s*(.-)%s*$', '%1') -- trim
-      if line ~= '' then
-        -- Extract ### from path (handles nested like chapters/001-...)
-        local num_str = string.match(line, '.*/(%d%d%d)-')
-        if num_str then
-          local num = tonumber(num_str)
-          if num and num > max_num then
-            max_num = num
-          end
+  -- THIS IS THE ONLY THING THAT WAS WRONG → now 100% correct
+  local function get_highest_number()
+    local highest = 0
+    -- Use basename so we only see the folder name, not the full path
+    local folders = vim.fn.systemlist {
+      'find',
+      base_dir,
+      '-type',
+      'd',
+      '-name',
+      '[0-9][0-9][0-9]-*',
+      '-exec',
+      'basename',
+      '{}',
+      ';',
+    }
+
+    for _, foldername in ipairs(folders) do
+      local num = foldername:match '^(%d%d%d)%-' -- ^ = start of string
+      if num then
+        local n = tonumber(num)
+        if n > highest then
+          highest = n
         end
       end
     end
-    return max_num
+    return highest
   end
 
-  local maxnum = get_max_num(notes_dir)
-  local newnum = string.format('%03d', maxnum + 1)
-  local folder = notes_dir .. '/' .. newnum .. '-' .. date .. '-' .. name
-  local texfile = folder .. '/' .. newnum .. '-' .. date .. '-' .. name .. '.tex'
+  local next_num = get_highest_number() + 1
+  local num_str = string.format('%03d', next_num)
 
-  -- Create folder if missing
-  if vim.fn.isdirectory(folder) == 0 then
-    vim.fn.mkdir(folder, 'p')
-  end
+  local folder = base_dir .. '/' .. num_str .. '-' .. date .. '-' .. name
+  local texfile = folder .. '/' .. num_str .. '-' .. date .. '-' .. name .. '.tex'
+  local template = vim.fn.expand '~/git/Clase/template/template.tex'
 
-  -- Copy template
+  vim.fn.mkdir(folder, 'p')
+
   if vim.fn.filereadable(texfile) == 0 then
-    local template = vim.fn.expand '~/git/Clase/template/template.tex'
-    vim.fn.system('cp ' .. vim.fn.shellescape(template) .. ' ' .. vim.fn.shellescape(texfile))
-    print('Created note: ' .. texfile)
-  else
-    print('Opened existing note: ' .. texfile)
+    if vim.fn.filereadable(template) == 1 then
+      vim.fn.system { 'cp', template, texfile }
+      print('Created → ' .. texfile)
+    else
+      vim.fn.writefile({
+        '\\documentclass{article}',
+        '\\begin{document}',
+        '\\title{' .. name .. '}',
+        '\\date{' .. date .. '}',
+        '\\maketitle',
+        '',
+        '\\end{document}',
+      }, texfile)
+      print('Created minimal → ' .. texfile)
+    end
   end
 
-  -- Open file
-  vim.cmd('edit ' .. vim.fn.escape(texfile, ' '))
-end, { desc = 'New numbered Zettelkasten note in folder' })
+  vim.cmd.edit(vim.fn.fnameescape(texfile))
+end, { desc = 'Zettel: New numbered note — NOW IT REALLY WORKS' })
+-------------------------------------------------------------------------------
+--  Modify nvim notify
+-------------------------------------------------------------------------------
+require('notify').setup {
+  render = 'minimal',
+  stages = 'fade_in_slide_out',
+  top_down = false,
+  timeout = 4000,
+  merge_duplicates = true,
+}
+
+-- Open all past notifications with Telescope
+vim.keymap.set('n', '<leader>fn', '<cmd>Telescope notify<cr>', { desc = 'Find notifications' })
 
 -------------------------------------------------------------------------------
 --    incfig.nvim (Telescope fuzzy search version)
@@ -1618,3 +1465,20 @@ vim.keymap.set({ 'i', 'n' }, '<C-j>', function()
   vim.cmd 'stopinsert'
   vim.cmd 'normal! ma[s1z=`a'
 end, { noremap = true, silent = true })
+
+vim.diagnostic.config {
+  float = {
+    border = 'none',
+    header = '',
+    prefix = '',
+    source = false,
+  },
+}
+
+vim.o.updatetime = 250
+
+vim.api.nvim_create_autocmd('CursorHold', {
+  callback = function()
+    vim.diagnostic.open_float(nil, { focus = false })
+  end,
+})
