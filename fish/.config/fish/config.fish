@@ -117,7 +117,7 @@ if status is-login
     end
         if not set -q WAYLAND_DISPLAY
             
-	    exec uwsm start start-hyprland
+            uwsm start hyprland.desktop
 
         end
     end
