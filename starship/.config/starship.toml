@@ -206,11 +206,11 @@ version_format = "${raw}"
 [lua]
 format = " [lua](italic) [${symbol}${version}]($style)"
 version_format = "${raw}"
-symbol = "⨀ "
+symbol = " "
 style = "bold bright-yellow"
 
 [nodejs]
-format = " [node](italic) [◫ ($version)](bold bright-green)"
+format = " [node](italic) [󰎙 ($version)](bold bright-green)"
 version_format = "${raw}"
 detect_files = ["package-lock.json", "yarn.lock"]
 detect_folders = ["node_modules"]
@@ -224,20 +224,20 @@ style = "bold bright-yellow"
 
 [ruby]
 format = " [rb](italic) [${symbol}${version}]($style)"
-symbol = "◆ "
+symbol = " "
 version_format = "${raw}"
 style = "bold red"
 
 [rust]
 format = " [rs](italic) [$symbol$version]($style)"
-symbol = "⊃ "
+symbol = "󱘗 "
 version_format = "${raw}"
 style = "bold red"
 
 [package]
 format = " [pkg](italic dimmed) [$symbol$version]($style)"
 version_format = "${raw}"
-symbol = "◨ "
+symbol = " "
 style = "dimmed yellow italic bold"
 
 [swift]
@@ -250,22 +250,22 @@ version_format = "${raw}"
 disabled = true
 format = " [aws](italic) [$symbol $profile $region]($style)"
 style = "bold blue"
-symbol = "▲ "
+symbol = " "
 
 [buf]
 symbol = "■ "
 format = " [buf](italic) [$symbol $version $buf_version]($style)"
 
 [c]
-symbol = "ℂ "
+symbol = " "
 format = " [$symbol($version(-$name))]($style)"
 
 [conda]
-symbol = "◯ "
+symbol = " "
 format = " conda [$symbol$environment]($style)"
 
 [dart]
-symbol = "◁◅ "
+symbol = " "
 format = " dart [$symbol($version )]($style)"
 
 [docker_context]
@@ -281,7 +281,7 @@ symbol = "◩ "
 format = " elm [$symbol($version )]($style)"
 
 [golang]
-symbol = "∩ "
+symbol = " "
 format = " go [$symbol($version )]($style)"
 
 [haskell]
