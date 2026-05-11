@@ -1,0 +1,1 @@
+../../../dotfiles/fish/.config/fish/functions/_sponge_on_exit.fish

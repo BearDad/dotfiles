@@ -1,0 +1,1 @@
+../../../dotfiles/fish/.config/fish/functions/_autopair_insert_left.fish

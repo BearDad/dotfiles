@@ -1,0 +1,1 @@
+../../../dotfiles/fish/.config/fish/functions/__abbr_tips_bind_newline.fish

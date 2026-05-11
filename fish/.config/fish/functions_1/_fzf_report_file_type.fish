@@ -1,0 +1,1 @@
+../../../dotfiles/fish/.config/fish/functions/_fzf_report_file_type.fish

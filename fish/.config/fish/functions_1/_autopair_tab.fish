@@ -1,0 +1,1 @@
+../../../dotfiles/fish/.config/fish/functions/_autopair_tab.fish

@@ -665,6 +665,49 @@ require('lazy').setup({
       })
 
       vim.lsp.enable 'arduino_language_server'
+      -- TypeScript & JavaScript LSP
+      vim.lsp.config('ts_ls', {
+        settings = {
+          typescript = {
+            inlayHints = {
+              includeInlayParameterNameHints = 'all',
+              includeInlayFunctionParameterTypeHints = true,
+            },
+          },
+          javascript = {
+            inlayHints = {
+              includeInlayParameterNameHints = 'all',
+              includeInlayFunctionParameterTypeHints = true,
+            },
+          },
+        },
+      })
+      -- latex
+      vim.lsp.config('texlab', {
+        settings = {
+          texlab = {
+            chktex = {
+              onEdit = false,
+              onSave = true,
+            },
+            inlayHints = {
+              labelDefinitions = true,
+              labelReferences = true,
+            },
+          },
+        },
+      })
+
+      vim.lsp.config('cssls', {
+        settings = {
+          css = { validate = true },
+        },
+      })
+      vim.lsp.enable 'cssls'
+      vim.lsp.enable 'texlab'
+      vim.lsp.enable 'ts_ls'
+      vim.lsp.enable 'marksman'
+      vim.lsp.enable 'fish_lsp'
 
       local servers = {
         -- clangd = {},
@@ -755,8 +798,21 @@ require('lazy').setup({
       format_on_save = function(bufnr)
         -- You can specify filetypes to autoformat on save here:
         local enabled_filetypes = {
-          -- lua = true,
-          -- python = true,
+          lua = true,
+          python = true,
+          go = true,
+          javascript = true,
+          typescript = true,
+          javascriptreact = true,
+          typescriptreact = true,
+          css = true,
+          html = true,
+          json = true,
+          yaml = true,
+          markdown = true,
+          c = true,
+          cpp = true,
+          tex = true,
         }
         if enabled_filetypes[vim.bo[bufnr].filetype] then
           return { timeout_ms = 500 }
@@ -783,6 +839,7 @@ require('lazy').setup({
         markdown = { 'prettierd', 'prettier', stop_after_first = true },
         c = { 'clang_format' },
         cpp = { 'clang_format' },
+        tex = { 'latexindent' },
         -- Conform can also run multiple formatters sequentially
         -- python = { "isort", "black" },
         --
@@ -834,6 +891,11 @@ require('lazy').setup({
               require('luasnip').filetype_extend('sh', { 'shelldoc' })
             end,
           },
+          -- {
+          --   'iurimateus/luasnip-latex-snippets.nvim',
+          --   ft = { 'tex', 'plaintex' },
+          --   config = function() require('luasnip-latex-snippets').setup { use_treesitter = false } end,
+          -- },
         },
         opts = {},
       },
@@ -998,9 +1060,11 @@ require('lazy').setup({
 
         -- enables treesitter based folds
         -- for more info on folds see `:help folds`
-        -- vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
-        -- vim.wo.foldmethod = 'expr'
-
+        vim.wo.foldexpr = 'v:lua.vim.treesitter.foldexpr()'
+        vim.wo.foldmethod = 'expr'
+        vim.opt.foldlevel = 99
+        vim.opt.foldlevelstart = 99
+        vim.opt.foldtext = ''
         -- check if treesitter indentation is available for this language, and if so enable it
         -- in case there is no indent query, the indentexpr will fallback to the vim's built in one
         local has_indent_query = vim.treesitter.query.get(language, 'indents') ~= nil
@@ -1013,7 +1077,7 @@ require('lazy').setup({
       vim.api.nvim_create_autocmd('FileType', {
         callback = function(args)
           local buf, filetype = args.buf, args.match
-
+          if filetype == 'tex' or filetype == 'latex' then return end
           local language = vim.treesitter.language.get_lang(filetype)
           if not language then return end
 
@@ -1092,11 +1156,11 @@ require('lazy').setup({
 require('kanagawa').setup {
   compile = true, -- enable compiling the colorscheme
   undercurl = true, -- enable undercurls
-commentStyle = { italic = true },
-functionStyle = {},
-keywordStyle = {},
-statementStyle = { bold = true },
-typeStyle = { italic = true },
+  commentStyle = { italic = true },
+  functionStyle = {},
+  keywordStyle = {},
+  statementStyle = { bold = true },
+  typeStyle = { italic = true },
   transparent = true, -- do not set background color
   dimInactive = true, -- dim inactive window `:h hl-NormalNC`
   terminalColors = true, -- define vim.g.terminal_color_{0,17}
@@ -1232,39 +1296,39 @@ vim.keymap.set('n', '<leader>cr', function() return ':IncRename ' .. vim.fn.expa
 -- NOTE: END OF LINE CHARS
 vim.opt.fillchars = { eob = ' ' }
 
-require('colorizer').setup {
-  filetypes = { '*' },
-  user_default_options = {
-    names = true, -- "Name" codes like Blue or blue
-    RGB = true, -- #RGB hex codes
-    RRGGBB = true, -- #RRGGBB hex codes
-    RRGGBBAA = true, -- #RRGGBBAA hex codes
-    AARRGGBB = true, -- 0xAARRGGBB hex codes
-    rgb_fn = true, -- CSS rgb() and rgba() functions
-    hsl_fn = true, -- CSS hsl() and hsla() functions
-    css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
-    css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
-    -- Highlighting mode.  'background'|'foreground'|'virtualtext'
-    mode = 'background', -- Set the display mode
-    -- Tailwind colors.  boolean|'normal'|'lsp'|'both'.  True is same as normal
-    tailwind = 'both', -- Enable tailwind colors
-    -- parsers can contain values used in |user_default_options|
-    sass = { enable = true, parsers = { 'css' } }, -- Enable sass colors
-    -- Virtualtext character to use
-    virtualtext = '■',
-    -- Display virtualtext inline with color
-    virtualtext_inline = true,
-    -- Virtualtext highlight mode: 'background'|'foreground'
-    virtualtext_mode = 'foreground',
-    -- update color values even if buffer is not focused
-    -- example use: cmp_menu, cmp_docs
-    always_update = true,
-  },
-  -- all the sub-options of filetypes apply to buftypes
-  buftypes = {},
-  -- Boolean | List of usercommands to enable
-  user_commands = true, -- Enable all or some usercommands
-}
+-- require('colorizer').setup {
+--   filetypes = { '*' },
+--   user_default_options = {
+--     names = true, -- "Name" codes like Blue or blue
+--     RGB = true, -- #RGB hex codes
+--     RRGGBB = true, -- #RRGGBB hex codes
+--     RRGGBBAA = true, -- #RRGGBBAA hex codes
+--     AARRGGBB = true, -- 0xAARRGGBB hex codes
+--     rgb_fn = true, -- CSS rgb() and rgba() functions
+--     hsl_fn = true, -- CSS hsl() and hsla() functions
+--     css = true, -- Enable all CSS features: rgb_fn, hsl_fn, names, RGB, RRGGBB
+--     css_fn = true, -- Enable all CSS *functions*: rgb_fn, hsl_fn
+--     -- Highlighting mode.  'background'|'foreground'|'virtualtext'
+--     mode = 'virtualtext', -- Set the display mode
+--     -- Tailwind colors.  boolean|'normal'|'lsp'|'both'.  True is same as normal
+--     tailwind = 'both', -- Enable tailwind colors
+--     -- parsers can contain values used in |user_default_options|
+--     sass = { enable = true, parsers = { 'css' } }, -- Enable sass colors
+--     -- Virtualtext character to use
+--     virtualtext = '■',
+--     -- Display virtualtext inline with color
+--     virtualtext_inline = true,
+--     -- Virtualtext highlight mode: 'background'|'foreground'
+--     virtualtext_mode = 'background',
+--     -- update color values even if buffer is not focused
+--     -- example use: cmp_menu, cmp_docs
+--     always_update = true,
+--   },
+--   -- all the sub-options of filetypes apply to buftypes
+--   buftypes = {},
+--   -- Boolean | List of usercommands to enable
+--   user_commands = true, -- Enable all or some usercommands
+-- }
 
 vim.opt.termguicolors = true
 vim.api.nvim_set_hl(0, 'CursorLine', { bg = '#191724' }) -- Use a darker or blended color
@@ -1572,3 +1636,20 @@ vim.api.nvim_create_autocmd('CursorHold', {
 })
 
 vim.filetype.add { extension = { ino = 'cpp' } }
+
+-- Harpoon
+local harpoon = require 'harpoon'
+
+-- REQUIRED
+harpoon:setup()
+-- REQUIRED
+
+vim.keymap.set('n', '<Leader>a', function() harpoon:list():add() end, { desc = '[H]arpoon: Add' })
+vim.keymap.set('n', '<C-e>', function() harpoon.ui:toggle_quick_menu(harpoon:list()) end, { desc = '[H]arpoon: Toggle quick menu' })
+
+vim.keymap.set('n', '<C-1>', function() harpoon:list():select(1) end, { desc = '[H]arpoon: Select 1' })
+vim.keymap.set('n', '<C-2>', function() harpoon:list():select(2) end, { desc = '[H]arpoon: Select 2' })
+vim.keymap.set('n', '<C-3>', function() harpoon:list():select(3) end, { desc = '[H]arpoon: Select 3' })
+vim.keymap.set('n', '<C-4>', function() harpoon:list():select(4) end, { desc = '[H]arpoon: Select 4' })
+
+-- Toggle previous & next buffers stored within Harpoon list
