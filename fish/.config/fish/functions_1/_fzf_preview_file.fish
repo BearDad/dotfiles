@@ -1,1 +1,0 @@
-../../../dotfiles/fish/.config/fish/functions/_fzf_preview_file.fish

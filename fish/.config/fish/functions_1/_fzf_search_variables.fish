@@ -1,1 +1,0 @@
-../../../dotfiles/fish/.config/fish/functions/_fzf_search_variables.fish

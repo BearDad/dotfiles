@@ -1,1 +1,0 @@
-../../../dotfiles/fish/.config/fish/functions/_sponge_on_postexec.fish

@@ -1,1 +1,0 @@
-../../../dotfiles/fish/.config/fish/functions/__abbr_tips_clean.fish
