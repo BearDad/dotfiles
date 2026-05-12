@@ -1,0 +1,41 @@
+* {
+  font-family: JetBrainsMono Nerd Font;
+  font-size: 12px;
+  padding: 0;
+  margin: 0;
+}
+
+#waybar {
+  color: #dcd7ba; /* fujiWhite */
+  background-color: #1f1f28; /* sumiInk0 */
+}
+
+#workspaces button {
+  padding: 0 3px;
+  color: #727169; /* fujiGray */
+}
+
+/* #workspaces button.active { */
+/*   color: #dcd7ba;  */
+/*   background: #2d4f67;  */
+/* } */
+
+#workspaces button:hover {
+  background: #223249; /* waveBlue1 */
+}
+
+/* #memory, */
+/* #custom-platform-profile { */
+/*   padding-left: 1em; */
+/* } */
+
+#wireplumber,
+#battery,
+#idle_inhibitor,
+#language,
+#network,
+#bluetooth,
+#tray {
+  padding-right: 4px;
+}
+

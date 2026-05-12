@@ -703,11 +703,28 @@ require('lazy').setup({
           css = { validate = true },
         },
       })
+
+      vim.lsp.config('jsonls', {
+        filetypes = { 'json', 'jsonc' },
+        get_language_id = function(_, filetype)
+          if filetype == 'jsonc' then return 'jsonc' end
+          return 'json'
+        end,
+        settings = {
+          json = {
+            validate = { enable = true },
+          },
+        },
+        on_attach = function(client, bufnr)
+          if vim.bo[bufnr].filetype == 'jsonc' then client.server_capabilities.diagnosticProvider = false end
+        end,
+      })
       vim.lsp.enable 'cssls'
       vim.lsp.enable 'texlab'
       vim.lsp.enable 'ts_ls'
       vim.lsp.enable 'marksman'
       vim.lsp.enable 'fish_lsp'
+      vim.lsp.enable 'jsonls'
 
       local servers = {
         -- clangd = {},
@@ -835,6 +852,7 @@ require('lazy').setup({
         css = { 'prettierd', 'prettier', stop_after_first = true },
         html = { 'prettierd', 'prettier', stop_after_first = true },
         json = { 'prettierd', 'prettier', stop_after_first = true },
+        jsonc = { 'prettierd', 'prettier', stop_after_first = true },
         yaml = { 'prettierd', 'prettier', stop_after_first = true },
         markdown = { 'prettierd', 'prettier', stop_after_first = true },
         c = { 'clang_format' },
