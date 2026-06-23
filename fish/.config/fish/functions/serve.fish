@@ -1,3 +1,3 @@
 function serve
-    live-server --no-browser
+    live-server --no-browser $argv[1]
 end

@@ -1,64 +1,41 @@
 window {
-  background-color: rgba(22, 22, 29, 0.9);
+  background-color: rgba(22, 22, 29, 0.8);
 }
-
 button {
   color: #dcd7ba;
   background-color: rgba(31, 31, 40, 0.8);
-  border: 1px solid rgba(84, 84, 109, 0.4);
-  border-radius: 8px;
-  padding: 4px;
-  margin: 6px;
-  min-width: 80px;
-  min-height: 80px;
+  border: none;
+  padding: 10px;
 }
-
 button label.action-name {
-  font-size: 14px;
-  font-weight: 400;
+  font-size: 24px;
 }
-
 button label.keybind {
-  font-size: 11px;
+  font-size: 20px;
   font-family: monospace;
-  color: #727169;
 }
-
 button:hover label.keybind,
 button:focus label.keybind {
   opacity: 1;
 }
-
-button:focus,
-button:hover {
-  background-color: rgba(84, 84, 109, 0.4);
-  border-color: #727169;
+button:hover,
+button:focus {
+  color: #7e9cd8;
+  background-color: rgba(22, 22, 29, 0.9);
 }
-
 button:active {
-  background-color: rgba(84, 84, 109, 0.6);
+  color: #1f1f28;
+  background-color: #7e9cd8;
 }
-
 button#shutdown {
   color: #e82424;
 }
-
-button#hibernate {
-  color: #7e9cd8;
-}
-
 button#reboot {
   color: #98bb6c;
 }
-
 button#lock {
   color: #e6c384;
 }
-
 button#logout {
   color: #ffa066;
-}
-
-button#suspend {
-  color: #957fb8;
 }

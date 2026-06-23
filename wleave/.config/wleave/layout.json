@@ -3,26 +3,15 @@
   "css": "/home/kuma/.config/wleave/style.css",
   "buttons": [
     {
+      "label": "lock",
+      "action": "systemd-run --user hyprlock",
+      "text": "Lock",
+      "keybind": "l",
+      "icon": "/usr/share/wleave/icons/lock.svg"
+    },
+    {
       "label": "logout",
-      "action": [
-        {
-          "$DESKTOP_SESSION": "niri",
-          "shell": "niri msg action quit --skip-confirmation"
-        },
-        {
-          "$DESKTOP_SESSION": "sway",
-          "shell": "swaymsg exit"
-        },
-        {
-          "$DESKTOP_SESSION": "plasma",
-          "shell": "qdbus org.kde.KWin /Session org.kde.KWin.Session.quit"
-        },
-        {
-          "$DESKTOP_SESSION": "gnome",
-          "shell": "gnome-session-quit --no-prompt"
-        },
-        "loginctl terminate-user $USER"
-      ],
+      "action": "hyprctl dispatch exit 0",
       "text": "Logout",
       "keybind": "e",
       "icon": "/usr/share/wleave/icons/logout.svg"

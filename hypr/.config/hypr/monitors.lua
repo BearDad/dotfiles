@@ -1,0 +1,14 @@
+-- See https://wiki.hypr.land/Configuring/Basics/Monitors/
+hl.monitor({
+	output = "edP-1",
+	mode = "1920x1080@144.0",
+	position = "auto",
+	scale = "1.0",
+})
+
+hl.monitor({
+	output = "HDMI-A-1",
+	mode = "1920x1080@165.0",
+	position = "0x0",
+	scale = "1.0",
+})

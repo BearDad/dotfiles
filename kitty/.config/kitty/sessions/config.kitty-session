@@ -1,0 +1,12 @@
+
+new_tab
+layout tall
+enabled_layouts grid,splits,tall
+set_layout_state {"biased_cols": {}, "biased_rows": {}, "opts": {}, "class": "Grid", "all_windows": {"active_group_idx": 1, "active_group_history": [2, 1], "window_groups": [{"id": 1, "window_ids": [1]}, {"id": 2, "window_ids": [2]}]}}
+cd /home/kuma/.config
+
+launch 'kitty-unserialize-data={"id": 1}'
+launch 'kitty-unserialize-data={"id": 2}'
+focus
+
+focus_tab 0

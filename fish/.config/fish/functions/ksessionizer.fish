@@ -1,9 +1,9 @@
 function ksessionizer
     if test -n "$argv[1]"
-        set project (find $argv[1] -maxdepth 2 -type l | gum filter --limit 1 --no-sort --fuzzy --placeholder 'Pick a session' --prompt='⚡')
+        set project (find $argv[1] -maxdepth 3 -type l | gum filter --limit 1 --no-sort --fuzzy --placeholder 'Pick a session' --prompt='⚡')
 
     else 
-        set project (find ~/git -maxdepth 2 -type d | gum filter --limit 1 --no-sort --fuzzy --placeholder 'Pick a session' --prompt='⚡')
+        set project (find ~/git -maxdepth 3 -type d | gum filter --limit 1 --no-sort --fuzzy --placeholder 'Pick a session' --prompt='⚡')
     end
     if test -z "$project"
         echo "No project found"

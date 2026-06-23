@@ -53,9 +53,7 @@ if status is-interactive
 end
 # setup homebrew alias 
 if status is-interactive
-    test -d ~/.linuxbrew && eval "$(~/.linuxbrew/bin/brew shellenv)"
-    test -d /home/linuxbrew/.linuxbrew && eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
-    echo "eval \"\$($(brew --prefix)/bin/brew shellenv)\"" >>~/.bashrc
+    fish_add_path --prepend /usr/bin
     zoxide init fish | source
     alias cd="z"
     alias cdi="zi"
@@ -122,7 +120,6 @@ if status is-login
         end
     end
 end
-
 
 
 

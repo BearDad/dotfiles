@@ -22,6 +22,7 @@
     // "backlight",
     // "keyboard-state",
     "tray",
+    "battery",
     "custom/power",
   ],
   // Modules configuration
@@ -159,6 +160,6 @@
     //   "suspend": "systemctl suspend",
     //   "hibernate": "systemctl hibernate",
     // },
-    "on-click": "wleave"
+    "on-click": "vicinae vicinae://launch/power/"
   },
 }
