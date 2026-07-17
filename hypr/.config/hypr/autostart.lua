@@ -4,8 +4,11 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("gsr-ui launch-daemon")
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
 
-	hl.exec_cmd("hyprctl dispatch workspace 1")
-	hl.exec_cmd("sleep 0.3 && hyprctl dispatch focusmonitor eDP-1 && hyprctl dispatch workspace 10")
+	hl.exec_cmd("hyprctl dispatch 'hl.dsp.focus({ workspace = 1 })'")
+	hl.exec_cmd(
+		"sleep 0.3 && hyprctl dispatch 'hl.dsp.focus({ monitor = \"eDP-1\" })' "
+			.. "&& hyprctl dispatch 'hl.dsp.focus({ workspace = 10 })'"
+	)
 
 	hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP XDG_SESSION_TYPE")
 	hl.exec_cmd("hyprpolkitagent")

@@ -6,14 +6,16 @@
 -- ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═════╝ ╚═╝╚═╝  ╚═══╝╚═════╝ ╚══════╝
 -- see https://wiki.hypr.land/Configuring/Basics/Binds/
 
+local programs = require("programs")
+
 local mainMod = "SUPER"
 
 local scrPath = os.getenv("HOME") .. "/.config/hypr/scripts"
 
-local TERMINAL = "kitty"
-local EDITOR = "nvim"
-local EXPLORER = "nautilus"
-local BROWSER = "zen-browser"
+local TERMINAL = programs.terminal
+local EDITOR = programs.editor
+local EXPLORER = programs.fileManager
+local BROWSER = programs.browser
 
 -- ── Window Management ──────────────────────────────────────────────
 
@@ -89,7 +91,7 @@ hl.bind(mainMod .. " + Z", hl.dsp.exec_cmd(BROWSER), { description = "web browse
 hl.bind("CTRL + SHIFT + Escape", hl.dsp.exec_cmd("kitty -e htop"), { description = "system monitor" })
 
 -- Rofi / launcher
-hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd("vicinae toggle"), { description = "application finder" })
+hl.bind(mainMod .. " + Space", hl.dsp.exec_cmd(programs.menu), { description = "application finder" })
 
 -- ── Audio ──────────────────────────────────────────────────────────
 
