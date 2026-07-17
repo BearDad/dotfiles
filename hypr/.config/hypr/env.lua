@@ -3,9 +3,9 @@
 -- env = GDK_BACKEND,wayland
 -- env = QT_QPA_PLATFORM,wayland
 
-hl.env("HYPRCURSOR_THEME", "volantes_cursors")
+hl.env("HYPRCURSOR_THEME", "Bibata-Original-Classic")
 hl.env("HYPRCURSOR_SIZE", "16")
-hl.env("XCURSOR_THEME", "volantes_cursors") -- fallback for GTK apps
+hl.env("XCURSOR_THEME", "Bibata-Original-Classic") -- fallback for GTK apps
 hl.env("XCURSOR_SIZE", "16")
 
 hl.env("GDK_BACKEND", "wayland")

@@ -10,12 +10,10 @@ function M.open_pdf()
 
   local forward = vim.fn.line '.' .. ':' .. vim.fn.col '.' .. ':' .. texfile
 
-  -- Try forward-jump first (works if zathura already open)
-  local result = vim.fn.system('zathura --synctex-forward ' .. forward .. ' ' .. pdffile .. ' 2>/dev/null; echo $?')
-  local exit = tonumber(vim.trim(result))
-
-  -- If that failed, open fresh without the flag
-  if exit ~= 0 then vim.fn.jobstart({ 'zathura', pdffile }, { detach = true }) end
+  -- Forward-search reuses an existing zathura instance if one is open, and
+  -- opens a fresh window otherwise. Run detached so Neovim never blocks, and
+  -- pass args as a list so paths with spaces are handled safely.
+  vim.fn.jobstart({ 'zathura', '--synctex-forward', forward, pdffile }, { detach = true })
 end
 
 return M

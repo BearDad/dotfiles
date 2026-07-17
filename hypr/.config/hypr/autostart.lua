@@ -1,4 +1,5 @@
 hl.on("hyprland.start", function()
+	hl.exec_cmd("uwsm finalize")
 	hl.exec_cmd("fcitx5 -d")
 	hl.exec_cmd("gsr-ui launch-daemon")
 	hl.exec_cmd("gnome-keyring-daemon --start --components=secrets")
@@ -17,6 +18,10 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("vicinae server")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("awww")
+
+	hl.exec_cmd(
+		" rclone mount gdrive: ~/gdrive --vfs-cache-mode writes --allow-other --dir-cache-time 10s --attr-timeout 1s & disown "
+	)
 
 	hl.exec_cmd("waybar")
 	hl.exec_cmd("hyprctl setcursor volantes_cursor 16")

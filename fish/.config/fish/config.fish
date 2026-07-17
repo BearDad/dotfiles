@@ -12,6 +12,7 @@ set -x SYSTEMD_EDITOR nvim
 set -x EDITOR nvim
 set -gx NPM_CONFIG_PREFIX $HOME/.npm-global
 set -gx NODE_PATH (npm root -g)
+set -gx QT_QPA_PLATFORM xcb
 fish_add_path $HOME/.npm-global/bin
 
 

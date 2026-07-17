@@ -55,31 +55,21 @@ end, { repeating = true, description = "resize window down" })
 -- ── Move active window ─────────────────────────────────────────────
 -- Float-aware: moves pixel-by-pixel if floating, else swaps tiled position
 
-local moveActive = string.format(
-	"grep -q 'true' <<< $(%s) && hyprctl dispatch moveactive",
-	"hyprctl activewindow -j | jq -r .floating"
-)
+local function moveActiveCmd(dx, dy, direction)
+	return string.format(
+		[[grep -q 'true' <<< $(hyprctl activewindow -j | jq -r .floating) && ]]
+			.. [[hyprctl dispatch 'hl.dsp.window.move({ x = %d, y = %d, relative = true })' || ]]
+			.. [[hyprctl dispatch 'hl.dsp.window.move({ direction = "%s" })']],
+		dx,
+		dy,
+		direction
+	)
+end
 
-hl.bind(
-	mainMod .. " + SHIFT + H",
-	hl.dsp.exec_cmd(moveActive .. " -30 0 || hyprctl dispatch movewindow l"),
-	{ repeating = true }
-)
-hl.bind(
-	mainMod .. " + SHIFT + L",
-	hl.dsp.exec_cmd(moveActive .. " 30 0 || hyprctl dispatch movewindow r"),
-	{ repeating = true }
-)
-hl.bind(
-	mainMod .. " + SHIFT + K",
-	hl.dsp.exec_cmd(moveActive .. " 0 -30 || hyprctl dispatch movewindow u"),
-	{ repeating = true }
-)
-hl.bind(
-	mainMod .. " + SHIFT + J",
-	hl.dsp.exec_cmd(moveActive .. " 0 30 || hyprctl dispatch movewindow d"),
-	{ repeating = true }
-)
+hl.bind(mainMod .. " + SHIFT + H", hl.dsp.exec_cmd(moveActiveCmd(-30, 0, "l")), { repeating = true })
+hl.bind(mainMod .. " + SHIFT + L", hl.dsp.exec_cmd(moveActiveCmd(30, 0, "r")), { repeating = true })
+hl.bind(mainMod .. " + SHIFT + K", hl.dsp.exec_cmd(moveActiveCmd(0, -30, "u")), { repeating = true })
+hl.bind(mainMod .. " + SHIFT + J", hl.dsp.exec_cmd(moveActiveCmd(0, 30, "d")), { repeating = true })
 
 -- ── Mouse move/resize ──────────────────────────────────────────────
 
@@ -136,6 +126,10 @@ hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = tr
 hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"), { locked = true })
 hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"), { locked = true })
 
+-- ── Brightness ──────────────────────────────────────────────────────────
+
+hl.bind("XF86MonBrightnessUp", hl.dsp.exec_cmd("brightnessctl set +5%"))
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl set -5%"))
 -- ── Utilities ──────────────────────────────────────────────────────
 
 hl.bind(
