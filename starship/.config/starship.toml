@@ -30,6 +30,7 @@ $pijul_channel\
 $docker_context\
 $package\
 $c\
+${custom.cpp}\
 $cmake\
 $cobol\
 $daml\
@@ -81,7 +82,6 @@ $gcloud\
 $openstack\
 $azure\
 $crystal\
-$custom\
 $status\
 $os\
 $battery\
@@ -261,13 +261,80 @@ format = " [buf](italic) [$symbol $version $buf_version]($style)"
 symbol = " "
 format = " [$symbol($version(-$name))]($style)"
 
+[custom.cpp]
+command = '''
+root="$PWD"
+while [ "$root" != "/" ] && [ ! -f "$root/platformio.ini" ] && [ ! -f "$root/.clangd" ] && [ ! -f "$root/CMakeLists.txt" ]; do
+    root=$(dirname "$root")
+done
+
+std=""
+
+if [ -f "$root/platformio.ini" ]; then
+    m=$(grep -v build_unflags "$root/platformio.ini" 2>/dev/null | grep -oE 'std=(c|gnu)\+\+[0-9a-z]+' | head -1)
+    [ -n "$m" ] && std="${m##*++}"
+fi
+
+if [ -z "$std" ] && [ -f "$root/.clangd" ]; then
+    m=$(grep -oE 'std=(c|gnu)\+\+[0-9a-z]+' "$root/.clangd" 2>/dev/null | head -1)
+    [ -n "$m" ] && std="${m##*++}"
+fi
+
+if [ -z "$std" ] && [ -f "$root/CMakeLists.txt" ]; then
+    m=$(grep -oE 'std=(c|gnu)\+\+[0-9a-z]+' "$root/CMakeLists.txt" 2>/dev/null | head -1)
+    if [ -n "$m" ]; then
+        std="${m##*++}"
+    else
+        m=$(grep -oE 'CXX_STANDARD +[0-9]+' "$root/CMakeLists.txt" 2>/dev/null | head -1)
+        [ -n "$m" ] && std=$(echo "$m" | grep -oE '[0-9]+')
+    fi
+fi
+
+case "$std" in
+    98|03) std=98 ;;
+    11|0x) std=11 ;;
+    14|1y) std=14 ;;
+    17|1z) std=17 ;;
+    20|2a) std=20 ;;
+    23|2b) std=23 ;;
+    26|2c) std=26 ;;
+    "")
+        cpp=$(echo | c++ -x c++ -dM -E - 2>/dev/null | grep -m1 __cplusplus | awk '{print $3}')
+        case "$cpp" in
+            199711L) std=98 ;;
+            201103L) std=11 ;;
+            201402L) std=14 ;;
+            201703L) std=17 ;;
+            202002L) std=20 ;;
+            202302L) std=23 ;;
+            *) std="?" ;;
+        esac
+        ;;
+esac
+
+echo "C++$std"
+'''
+when = '''
+d="$PWD"
+while [ "$d" != "/" ]; do
+    { [ -f "$d/.clangd" ] || [ -f "$d/platformio.ini" ]; } && exit 0
+    d=$(dirname "$d")
+done
+exit 1
+'''
+shell = ["sh"]
+detect_extensions = ["cpp", "cc", "cxx", "hpp", "hh", "hxx"]
+symbol = " "
+format = " [$symbol($output)]($style)"
+style = "bold blue"
+
 [conda]
 symbol = " "
 format = " conda [$symbol$environment]($style)"
 
 [dart]
 symbol = " "
-format = " dart [$symbol($version )]($style)"
+format = " dart [$symbol($dersion )]($style)"
 
 [docker_context]
 symbol = "◧ "

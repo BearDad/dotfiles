@@ -19,7 +19,7 @@ local BROWSER = programs.browser
 
 -- ── Window Management ──────────────────────────────────────────────
 
-hl.bind(mainMod .. " + C", hl.dsp.window.close(), { description = "close focused window" })
+hl.bind("ALT + C", hl.dsp.window.close(), { description = "close focused window" })
 hl.bind(mainMod .. " + ALT + F4", hl.dsp.window.close(), { description = "close focused window" })
 hl.bind(mainMod .. " + DELETE", hl.dsp.exit(), { description = "kill hyprland session" })
 hl.bind(mainMod .. " + W", hl.dsp.window.float({ action = "toggle" }), { description = "toggle floating" })
@@ -154,6 +154,11 @@ hl.bind(
 	{ locked = true, description = "print monitor" }
 )
 hl.bind("Print", hl.dsp.exec_cmd("grimblast -n copysave screen"), { locked = true, description = "print all monitors" })
+hl.bind(
+	mainMod .. " + SHIFT + R",
+	hl.dsp.exec_cmd(scrPath .. "/record.sh"),
+	{ description = "toggle screen recording" }
+)
 
 -- ── Workspaces ─────────────────────────────────────────────────────
 
@@ -216,6 +221,20 @@ hl.bind(
 	{ description = "move to notes" }
 )
 hl.bind(mainMod .. " + ALT + code:94", hl.dsp.window.move({ workspace = "special:notas", silent = true }))
+
+-- T3 Code
+
+hl.bind(
+	mainMod .. " + SHIFT + C",
+	hl.dsp.window.move({ workspace = "special:IA" }),
+	{ description = "move to IA workspace" }
+)
+hl.bind(
+	mainMod .. " + ALT + C",
+	hl.dsp.window.move({ workspace = "special", silent = true }),
+	{ description = "move to IA workspace (silent)" }
+)
+hl.bind(mainMod .. " + C", hl.dsp.workspace.toggle_special("IA"), { description = "toggle IA workspace" })
 
 -- ── Alt+G: AI/Books shortcut ───────────────────────────────────────
 

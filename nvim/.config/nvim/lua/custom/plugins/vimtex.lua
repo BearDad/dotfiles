@@ -8,7 +8,6 @@ return {
       -- ==============================
       vim.g.vimtex_compiler_method = 'latexmk'
       vim.g.vimtex_view_method = 'zathura' -- PDF viewer
-      vim.g.vimtex_view_automatic = 0 -- disable default auto-open
       vim.g.tex_conceal = 'abdmg'
       vim.g.tex_flavor = 'latex'
       vim.g.vimtex_syntax_conceal = {
@@ -30,34 +29,18 @@ return {
       -- ==============================
       -- Compiler setup with build folder
       -- ==============================
+      -- out_dir (not a raw -outdir= option) so VimTeX knows where the PDF lands
+      -- and can hand the right path to the viewer.
       vim.g.vimtex_compiler_latexmk = {
         executable = 'latexmk',
+        out_dir = 'build', -- per-note build folder
         options = {
           '-pdf',
-          '-shell-escape',
-          '-outdir=build', -- per-note build folder
           '-verbose',
           '-file-line-error',
-          '-interaction=nonstopmode',
+          '-synctex=1',
         },
       }
-
-      -- ==============================
-      -- Custom PDF open after compile (for -outdir=build)
-      -- ==============================
-      vim.cmd [[
-augroup VimtexBuildDir
-  autocmd!
-  autocmd User VimtexEventCompileSuccess lua require('vimtex_build_pdf').open_pdf()
-augroup END
-]]
-      vim.g.vimtex_view_general_options = function()
-        local texfile = vim.fn.expand '%:p'
-        local pdffile = vim.fn.expand '%:p:h' .. '/build/' .. vim.fn.expand '%:t:r' .. '.pdf'
-        return '--synctex-forward @line:@col:' .. texfile .. ' ' .. pdffile
-      end
     end,
   },
-
-  vim.api.nvim_set_keymap('n', '<leader>lv', [[:lua require('vimtex_build_pdf').open_pdf()<CR>]], { noremap = true, silent = true }),
 }

@@ -7,8 +7,10 @@ return {
 
       -- Window appearance
       window = {
-        width = 80, -- Width of the floating window
-        height = 20, -- Height of the floating window
+        dimensions = { -- table, or a function returning one
+          width = 80, -- Width of the floating window
+          height = 20, -- Height of the floating window
+        },
         border = 'rounded', -- Border style
       },
 

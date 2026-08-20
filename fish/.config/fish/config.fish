@@ -12,7 +12,6 @@ set -x SYSTEMD_EDITOR nvim
 set -x EDITOR nvim
 set -gx NPM_CONFIG_PREFIX $HOME/.npm-global
 set -gx NODE_PATH (npm root -g)
-set -gx QT_QPA_PLATFORM xcb
 fish_add_path $HOME/.npm-global/bin
 
 
@@ -24,11 +23,13 @@ fish_add_path $HOME/.npm-global/bin
 # exec tmux
 #end
 
-if not set -q SSH_AGENT_PID
-    eval (ssh-agent -c)
-    ssh-add ~/.ssh/id_ed25519
+if status is-interactive
+    if not set -q SSH_AGENT_PID
+        eval (ssh-agent -c)
+        ssh-add ~/.ssh/id_ed25519
+    end
+    clear
 end
-clear
 
 
 if status is-interactive
@@ -78,6 +79,7 @@ if status is-interactive
     alias v="nvim"
     alias lg="lazygit"
     alias gbd="git branch --merged | grep -v "\*" | xargs -n 1 git branch -d"
+    alias piopio="pio run -t clean -t compiledb -t upload -t monitor"
     # oh-my-posh init fish --config ~/tokyonight.toml | source
 end
 

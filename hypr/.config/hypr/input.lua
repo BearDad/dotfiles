@@ -52,6 +52,14 @@ hl.gesture({
 	end,
 })
 
+local function send(mods, key)
+	return function()
+		hl.dispatch(hl.dsp.send_shortcut({ mods = mods, key = key }))
+	end
+end
+
+hl.gesture({ fingers = 4, direction = "left", action = send("CTRL", "Page_Down") })
+hl.gesture({ fingers = 4, direction = "right", action = send("CTRL", "Page_Up") })
 -- Example per-device config
 -- See https://wiki.hypr.land/Configuring/Advanced-and-Cool/Devices/ for more
 -- hl.device({

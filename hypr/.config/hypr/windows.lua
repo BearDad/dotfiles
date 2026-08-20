@@ -204,7 +204,7 @@ hl.window_rule({ match = { class = "com.freerdp.client.sdl3" }, workspace = "4",
 -- AI tools → special scratchpad, floating, centered
 hl.window_rule({
 	match = {
-		class = "chrome-gemini.google.com__app-Default|chrome-chatgpt.com__-Default|chrome-grok.com__-Default|chrome-claude.ai__-Default|chrome-www.perplexity.ai__-Default",
+		class = "chrome-gemini.google.com__app-Default|chrome-chatgpt.com__-Default|chrome-grok.com__-Default|com\\.anthropic\\.Claude|chrome-www.perplexity.ai__-Default",
 	},
 	workspace = "special",
 	float = true,

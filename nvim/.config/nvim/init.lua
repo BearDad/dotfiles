@@ -679,7 +679,7 @@ require('lazy').setup({
       vim.lsp.enable 'arduino_language_server'
       -- C/C++ LSP
       vim.lsp.config('clangd', {
-        cmd = { 'clangd', '--query-driver=**/xtensa-esp32-elf-*' },
+        cmd = { 'clangd', '--query-driver=**/xtensa-esp32-elf-*', '--header-insertion=never' },
         filetypes = { 'c', 'cpp' },
         root_markers = { 'compile_commands.json', '.git' },
       })
@@ -1263,8 +1263,7 @@ vim.cmd 'colorscheme kanagawa'
 -- NOTE: This are my personal keybinds
 --
 --
-vim.g.vimtex_view_method = 'zathura'
-vim.g.vimtex_compiler_method = 'latexmk'
+-- NOTE: vimtex settings live in lua/custom/plugins/vimtex.lua
 
 vim.keymap.set('n', '<leader>ee', '<cmd>Telescope emoji<cr>', { desc = 'Open NerdIcons' })
 vim.cmd [[
@@ -1722,7 +1721,14 @@ vim.api.nvim_create_autocmd('CursorHold', {
   callback = function() vim.diagnostic.open_float(nil, { focus = false }) end,
 })
 
-vim.filetype.add { extension = { ino = 'cpp' } }
+vim.filetype.add {
+  extension = {
+    ino = 'cpp',
+    ['h++'] = 'cpp',
+    ['c++'] = 'cpp',
+    tpp = 'cpp',
+  },
+}
 
 -- Harpoon
 local harpoon = require 'harpoon'

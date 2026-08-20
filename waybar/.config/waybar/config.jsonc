@@ -14,6 +14,7 @@
     "clock",
   ],
   "modules-right": [
+    "custom/recording",
     "network",
     "pulseaudio",
     "power-profiles-daemon",
@@ -148,6 +149,13 @@
     "escape": true,
     "exec": "$HOME/.config/waybar/mediaplayer.py 2> /dev/null", // Script in resources folder
     // "exec": "$HOME/.config/waybar/mediaplayer.py --player spotify 2> /dev/null" // Filter player based on name
+  },
+  "custom/recording": {
+    "exec": "$HOME/.config/hypr/scripts/record-status.sh",
+    "return-type": "json",
+    "interval": "once",
+    "signal": 8,
+    "on-click": "$HOME/.config/hypr/scripts/record.sh",
   },
   "custom/power": {
     "format": "⏻ ",

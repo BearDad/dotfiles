@@ -40,3 +40,8 @@
 #tray {
   padding-right: 4px;
 }
+
+#custom-recording.recording {
+  color: #e82424; /* samuraiRed */
+  padding-right: 4px;
+}
