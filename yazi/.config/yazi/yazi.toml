@@ -1,0 +1,59 @@
+# Yazi config
+
+[mgr]
+sort_by        = "natural"
+sort_reverse   = false
+sort_dir_first = true
+show_hidden    = true
+
+[opener]
+edit = [
+  { run = "nvim %s", desc = "Edit in nvim", for = "unix", block = true },
+]
+pdf = [
+  { run = "zathura %s1", desc = "Open in zathura", for = "linux", orphan = true },
+]
+image = [
+  { run = "ristretto %s", desc = "Open in ristretto", for = "linux", orphan = true },
+]
+play = [
+  { run = "mpv --force-window %s", desc = "Play in mpv", for = "linux", orphan = true },
+]
+open = [
+  { run = "xdg-open %s1", desc = "Open with default app", for = "linux" },
+]
+reveal = [
+  { run = "xdg-open %d1", desc = "Reveal in file manager", for = "linux" },
+]
+
+[open]
+rules = [
+  # Folders -> nvim (Alpha.nvim shows up, cwd set by autocmd)
+  { url = "*/", use = [ "edit", "open", "reveal" ] },
+
+  # PDFs -> zathura
+  { mime = "application/pdf", use = [ "pdf", "open", "reveal" ] },
+  { url = "*.pdf",            use = [ "pdf", "open", "reveal" ] },
+
+  # Text, LaTeX, markdown -> nvim
+  { mime = "text/*", use = [ "edit", "open", "reveal" ] },
+  { url = "*.tex",   use = [ "edit", "open", "reveal" ] },
+  { url = "*.md",    use = [ "edit", "open", "reveal" ] },
+
+  { mime = "image/*", use = [ "image", "open", "reveal" ] },
+  { mime = "video/*", use = [ "play", "open", "reveal" ] },
+  { mime = "audio/*", use = [ "play", "open", "reveal" ] },
+
+  { mime = "application/{json,x-ndjson}", use = [ "edit", "open", "reveal" ] },
+  { mime = "*/javascript",                use = [ "edit", "open", "reveal" ] },
+
+  # Fallback
+  { url = "*", use = [ "open", "edit", "reveal" ] },
+]
+
+[preview]
+# NOTE: pixels, not terminal cells (yazi defaults: 600x900)
+max_width     = 1200
+max_height    = 1800
+image_filter  = "lanczos3"
+image_quality = 90
