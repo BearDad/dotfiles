@@ -212,6 +212,16 @@ hl.window_rule({
 	center = true,
 })
 
+-- T3 Code → IA scratchpad
+hl.window_rule({
+	name = "t3code-ia-workspace",
+	match = { class = "^com\\.t3tools\\.T3Code$" },
+	workspace = "special:IA",
+	float = true,
+	size = { 1650, 1000 },
+	center = true,
+})
+
 -- Gemini on ws5 → tiled
 hl.window_rule({ match = { class = "chrome-gemini.google.com__app-Default", workspace = "5" }, float = false })
 -- Books and school on ws5 → tiled

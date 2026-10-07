@@ -17,7 +17,7 @@ hl.on("hyprland.start", function()
 	hl.exec_cmd("udiskie --no-automount --smart-tray")
 	hl.exec_cmd("wl-paste --type text --watch cliphist store")
 	hl.exec_cmd("wl-paste --type image --watch cliphist store")
-	hl.exec_cmd("wl-paste --primary --watch wl-copy")
+	-- hl.exec_cmd("wl-paste --primary --watch wl-copy") -- disabled: mirrored mouse selection into clipboard, clobbered Ctrl+C
 	hl.exec_cmd("vicinae server")
 	hl.exec_cmd("awww-daemon")
 	hl.exec_cmd("awww")

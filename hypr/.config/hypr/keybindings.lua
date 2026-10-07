@@ -19,7 +19,7 @@ local BROWSER = programs.browser
 
 -- ── Window Management ──────────────────────────────────────────────
 
-hl.bind("ALT + C", hl.dsp.window.close(), { description = "close focused window" })
+hl.bind(mainMod .. "+ Q", hl.dsp.window.close(), { description = "close focused window" })
 hl.bind(mainMod .. " + ALT + F4", hl.dsp.window.close(), { description = "close focused window" })
 hl.bind(mainMod .. " + DELETE", hl.dsp.exit(), { description = "kill hyprland session" })
 hl.bind(mainMod .. " + W", hl.dsp.window.float({ action = "toggle" }), { description = "toggle floating" })
@@ -231,7 +231,7 @@ hl.bind(
 )
 hl.bind(
 	mainMod .. " + ALT + C",
-	hl.dsp.window.move({ workspace = "special", silent = true }),
+	hl.dsp.window.move({ workspace = "special:IA", silent = true }),
 	{ description = "move to IA workspace (silent)" }
 )
 hl.bind(mainMod .. " + C", hl.dsp.workspace.toggle_special("IA"), { description = "toggle IA workspace" })
