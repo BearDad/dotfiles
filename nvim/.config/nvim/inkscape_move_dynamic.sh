@@ -1,32 +1,39 @@
-#!/bin/bash
-# Inkscape launcher with workspace move
+#!/usr/bin/env bash
+# Launch Inkscape and move its new window to the special workspace (Hyprland).
 
 FILE="$1"
+CLASS="org.inkscape.Inkscape"
+TIMEOUT=30 # seconds; a cold start can be slow
+WORKSPACE="${INKSCAPE_WORKSPACE:-special:special}"
 
-# Launch Inkscape with or without a file
-if [ -n "$FILE" ]; then
-    inkscape "$FILE" &
-else
-    inkscape &
-fi
-
-# Give it a moment to start
-sleep 1
-
-# Function to move all Inkscape windows to workspace 5
-move_inkscape_windows() {
-    for WIN_ID in $(hyprctl clients | grep "org.inkscape.Inkscape" | awk '{print $1}'); do
-        hyprctl dispatch movetoworkspace special
-        # Optional: make it floating
-        # hyprctl dispatch toggletiled $WIN_ID
-    done
+inkscape_windows() {
+    hyprctl clients -j | jq -r --arg c "$CLASS" '.[] | select(.class == $c) | .address'
 }
 
-# Initial move
-move_inkscape_windows
+# Windows that already exist, so we only move the one we open
+before=$(inkscape_windows)
 
-# Watch for new windows spawned by Inkscape
-for i in {1..10}; do
-    sleep 0.5
-    move_inkscape_windows
+if [ -n "$FILE" ]; then
+    inkscape "$FILE" >/dev/null 2>&1 &
+else
+    inkscape >/dev/null 2>&1 &
+fi
+
+# Poll until the new window maps, then move it by address
+# (a dispatch without a window moves whatever window has focus).
+# Hyprland >= 0.55 (Lua config): hyprctl dispatch takes a Lua expression.
+for ((i = 0; i < TIMEOUT * 4; i++)); do
+    sleep 0.25
+    for addr in $(inkscape_windows); do
+        grep -qxF "$addr" <<<"$before" && continue
+        out=$(hyprctl dispatch "hl.dsp.window.move({ workspace = \"$WORKSPACE\", window = \"address:$addr\" })")
+        if [ "$out" != "ok" ]; then
+            echo "inkscape_move_dynamic: $out" >&2
+            exit 1
+        fi
+        exit 0
+    done
 done
+
+echo "inkscape_move_dynamic: no new Inkscape window after ${TIMEOUT}s" >&2
+exit 1

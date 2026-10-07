@@ -1429,10 +1429,30 @@ vim.keymap.set('n', '<leader>nn', function()
     print 'Aborted'
     return
   end
+  local title = vim.trim(name)
+  local accents = { ['á'] = 'a', ['é'] = 'e', ['í'] = 'i', ['ó'] = 'o', ['ú'] = 'u', ['ü'] = 'u', ['ñ'] = 'n', ['Á'] = 'a', ['É'] = 'e', ['Í'] = 'i', ['Ó'] = 'o', ['Ú'] = 'u', ['Ü'] = 'u', ['Ñ'] = 'n' }
+  for k, v in pairs(accents) do
+    name = name:gsub(k, v)
+  end
   name = string.lower(name):gsub('%s+', '-'):gsub('[^%w%-]', '')
   local date = os.date '%Y-%m-%d'
-  local cwd = vim.fn.getcwd()
-  local buf_dir = vim.fn.expand '%:p:h'
+  -- Base the note location on the current file's directory, not on nvim's cwd:
+  -- project.nvim chdirs to the git root on startup. For oil buffers use the listed
+  -- dir; for unnamed/special buffers use $PWD (the dir nvim was launched from).
+  local buf_name = vim.api.nvim_buf_get_name(0)
+  local buf_dir
+  if vim.bo.filetype == 'oil' then
+    buf_dir = require('oil').get_current_dir()
+  elseif vim.bo.buftype == '' and buf_name ~= '' then
+    buf_dir = vim.fn.fnamemodify(buf_name, ':p:h')
+  end
+  if not buf_dir or vim.fn.isdirectory(buf_dir) == 0 then
+    buf_dir = (vim.env.PWD and vim.fn.isdirectory(vim.env.PWD) == 1) and vim.env.PWD or vim.fn.getcwd()
+  end
+  buf_dir = buf_dir:gsub('/$', '')
+  -- Inside a section's own folder (…/sections/NNN-foo/) → treat as its sections/
+  if buf_dir:match '/sections/[^/]+$' then buf_dir = vim.fn.fnamemodify(buf_dir, ':h') end
+  local cwd = buf_dir
 
   local function create_note(base_dir, use_template)
     local function get_highest_number()
@@ -1473,7 +1493,14 @@ vim.keymap.set('n', '<leader>nn', function()
         vim.fn.system { 'cp', template, texfile }
         print('Created → ' .. texfile)
       else
-        vim.fn.writefile({}, texfile)
+        -- chapters/ gets a chapter heading; sections/ or inside a chapter, a section heading
+        local lines
+        if base_dir:match '/chapters$' then
+          lines = { '\\clearpage', '\\fchapter{' .. title .. '}', '' }
+        else
+          lines = { '\\fsection{' .. title .. '}', '' }
+        end
+        vim.fn.writefile(lines, texfile)
         print('Created → ' .. texfile)
       end
     end
@@ -1485,10 +1512,11 @@ vim.keymap.set('n', '<leader>nn', function()
   local has_chapters = vim.fn.isdirectory(chapters_dir) == 1
   local note_dir = vim.fn.fnamemodify(cwd, ':h')
 
-  local in_sections = buf_dir:match '/chapters/[^/]+/sections$' ~= nil
+  local sections_root = cwd .. '/sections'
+  local in_sections = buf_dir:match '/sections$' ~= nil
   local in_chapter = not in_sections and buf_dir:match '/chapters/[^/]+$' ~= nil
 
-  if in_sections then
+  if in_sections or buf_dir:match '/chapters$' then
     create_note(buf_dir, false)
   elseif in_chapter then
     local sections_dir = buf_dir .. '/sections'
@@ -1517,28 +1545,22 @@ vim.keymap.set('n', '<leader>nn', function()
     end
   elseif not has_root_tex then
     create_note(cwd, true)
-  elseif has_root_tex and not has_chapters then
-    vim.ui.select({ 'create chapters/', 'standalone note' }, { prompt = 'No chapters/ found:' }, function(choice)
-      if not choice then
-        print 'Aborted'
-        return
-      end
-      if choice == 'create chapters/' then
-        vim.fn.mkdir(chapters_dir, 'p')
-        create_note(chapters_dir, false)
-      else
-        create_note(note_dir, true)
-      end
-    end)
   else
-    vim.ui.select({ 'chapters/', 'standalone note' }, { prompt = 'Save to:' }, function(choice)
+    -- Document root: offer whatever structure exists (or can be created)
+    local options = { has_chapters and 'chapters/' or 'create chapters/' }
+    if vim.fn.isdirectory(sections_root) == 1 then table.insert(options, 'sections/') end
+    table.insert(options, 'standalone note')
+    vim.ui.select(options, { prompt = 'Save to:' }, function(choice)
       if not choice then
         print 'Aborted'
         return
       end
       if choice == 'standalone note' then
         create_note(note_dir, true)
+      elseif choice == 'sections/' then
+        create_note(sections_root, false)
       else
+        vim.fn.mkdir(chapters_dir, 'p')
         create_note(chapters_dir, false)
       end
     end)
@@ -1574,16 +1596,142 @@ local finders = require 'telescope.finders'
 local conf = require('telescope.config').values
 
 -- Git root helper
-local function git_root()
-  local file_dir = vim.fn.expand '%:p:h'
+local function git_root(dir)
+  local file_dir = dir or vim.fn.expand '%:p:h'
   local cmd = string.format('cd %s && git rev-parse --show-toplevel 2>/dev/null', vim.fn.shellescape(file_dir))
   local result = vim.fn.systemlist(cmd)[1]
-  if result and result ~= '' then return result end
+  if result and result ~= '' then
+    -- sanitize (escape codes / control chars from the shell)
+    return (result:gsub('\27%[[%d;]*[A-Za-z]', ''):gsub('%c', ''):gsub('^%s+', ''):gsub('%s+$', ''))
+  end
   return nil
 end
 
--- Spawn Inkscape
+-- First \setimagefolder{...} found in a list of lines (commented lines ignored)
+local function match_imagefolder(lines)
+  for _, line in ipairs(lines) do
+    local code = line:gsub('^%s*%%.*$', '')
+    local dir = code:match '\\setimagefolder%s*{(.-)}'
+    if dir and dir ~= '' then return dir end
+  end
+  return nil
+end
+
+-- Absolute path without trailing slash; relative paths resolve against base_dir
+local function normalize_dir(dir, base_dir)
+  dir = vim.fn.expand(dir)
+  if dir:sub(1, 1) ~= '/' then dir = base_dir .. '/' .. dir end
+  return (vim.fn.fnamemodify(dir, ':p'):gsub('/+$', ''))
+end
+
+-- Images folder for the current buffer:
+--   1. \setimagefolder of the current buffer, or of a .tex in a parent dir
+--      (so it also works from chapters/*.tex)
+--   2. failover: nearest images/ dir walking up to the git root
+--   3. failover: <dir of current file>/images (created)
+local function resolve_images_dir()
+  local file_dir = vim.fn.expand '%:p:h'
+  local stop = git_root(file_dir) or file_dir
+
+  local declared, declared_base
+  declared = match_imagefolder(vim.api.nvim_buf_get_lines(0, 0, -1, false))
+  if declared then declared_base = file_dir end
+
+  local dir = file_dir
+  while not declared do
+    local parent = vim.fn.fnamemodify(dir, ':h')
+    if dir == stop or parent == dir then break end
+    dir = parent
+    for _, tex in ipairs(vim.fn.globpath(dir, '*.tex', false, true)) do
+      declared = match_imagefolder(vim.fn.readfile(tex))
+      if declared then
+        declared_base = dir
+        break
+      end
+    end
+  end
+
+  if declared then
+    local path = normalize_dir(declared, declared_base)
+    if vim.fn.isdirectory(path) == 1 then return path end
+    vim.notify(
+      '\\setimagefolder apunta a ' .. path .. ', que no existe. Usando carpeta de failover; \\incfig no encontrará la figura hasta que corrijas la ruta.',
+      vim.log.levels.WARN
+    )
+  end
+
+  dir = file_dir
+  while true do
+    if vim.fn.isdirectory(dir .. '/images') == 1 then
+      if not declared then vim.notify('Sin \\setimagefolder; usando ' .. dir .. '/images', vim.log.levels.INFO) end
+      return dir .. '/images'
+    end
+    local parent = vim.fn.fnamemodify(dir, ':h')
+    if dir == stop or parent == dir then break end
+    dir = parent
+  end
+
+  local fallback = file_dir .. '/images'
+  vim.fn.mkdir(fallback, 'p')
+  vim.notify('No se encontró carpeta de imágenes; creada ' .. fallback, vim.log.levels.WARN)
+  return fallback
+end
+
+-- Export SVG -> PDF + PDF_TeX (what \incfig imports)
+local function export_svg(svg_file)
+  local pdf_file = svg_file:gsub('%.svg$', '.pdf')
+  vim.system(
+    { 'inkscape', svg_file, '--export-type=pdf', '--export-latex', '--export-filename=' .. pdf_file },
+    { text = true },
+    vim.schedule_wrap(function(res)
+      if res.code == 0 then
+        vim.notify('Inkscape: exportado ' .. vim.fn.fnamemodify(pdf_file, ':t') .. ' + .pdf_tex')
+      else
+        vim.notify('Inkscape: fallo al exportar ' .. svg_file .. '\n' .. (res.stderr or ''), vim.log.levels.ERROR)
+      end
+    end)
+  )
+end
+
+-- \incfig needs the .pdf_tex right away, not only after the first save in Inkscape
+local function ensure_exported(svg_file)
+  if vim.fn.filereadable((svg_file:gsub('%.svg$', '.pdf_tex'))) == 0 then export_svg(svg_file) end
+end
+
+-- Inkscape saves don't trigger BufWritePost, so watch the images folder and
+-- export every *.svg that changes. One watcher per folder, alive until nvim exits.
+local svg_watchers = {}
+local svg_timers = {}
+
+local function watch_images_dir(dir)
+  if svg_watchers[dir] then return end
+  local handle = vim.uv.new_fs_event()
+  local ok, err = handle:start(dir, {}, function(werr, fname)
+    -- skip non-SVGs (incl. our own .pdf/.pdf_tex output) and hidden temp files
+    if werr or not fname or not fname:match '%.svg$' or fname:sub(1, 1) == '.' then return end
+    local svg_file = dir .. '/' .. fname
+    -- debounce: Inkscape writes a temp file + rename, which fires several events
+    local timer = svg_timers[svg_file]
+    if not timer then
+      timer = vim.uv.new_timer()
+      svg_timers[svg_file] = timer
+    end
+    timer:stop()
+    timer:start(300, 0, vim.schedule_wrap(function()
+      if vim.fn.filereadable(svg_file) == 1 then export_svg(svg_file) end
+    end))
+  end)
+  if not ok then
+    handle:close()
+    vim.notify('Inkscape: no se pudo vigilar ' .. dir .. ': ' .. tostring(err), vim.log.levels.WARN)
+    return
+  end
+  svg_watchers[dir] = handle
+end
+
+-- Spawn Inkscape (and start auto-export for its folder)
 local function spawn_inkscape(file_path)
+  watch_images_dir(vim.fn.fnamemodify(file_path, ':p:h'))
   local script_path = vim.fn.expand '~/.config/nvim/inkscape_move_dynamic.sh'
   vim.fn.jobstart({ script_path, file_path }, { detach = true })
 end
@@ -1604,16 +1752,7 @@ end
 
 -- Open/create SVG with Telescope fuzzy search
 local function open_or_create_inkscape_svg()
-  local repo_root = git_root() or vim.fn.getcwd()
-  print('raw repo_root:', vim.inspect(repo_root)) -- debug
-
-  -- sanitize repo_root
-  repo_root = repo_root:gsub('\27%[[%d;]*[A-Za-z]', ''):gsub('%c', ''):gsub('^%s+', ''):gsub('%s+$', '')
-  print('clean repo_root:', vim.inspect(repo_root)) -- debug
-
-  local images_dir = repo_root .. '/images'
-
-  vim.fn.mkdir(images_dir, 'p')
+  local images_dir = resolve_images_dir()
 
   local svg_files = vim.fn.globpath(images_dir, '*.svg', false, true)
   local filenames = {}
@@ -1640,6 +1779,7 @@ local function open_or_create_inkscape_svg()
               if not input or input == '' then return end
               local file_path = images_dir .. '/' .. input .. '.svg'
               vim.fn.system { 'cp', template_path, file_path }
+              ensure_exported(file_path)
               spawn_inkscape(file_path)
               insert_incfig(input)
             end)
@@ -1655,9 +1795,11 @@ local function open_or_create_inkscape_svg()
             vim.ui.select(options, { prompt = 'File exists, choose action:' }, function(opt)
               if not opt then return end
               if opt == 'Open in Inkscape + insert \\incfig' then
+                ensure_exported(file_path)
                 spawn_inkscape(file_path)
                 insert_incfig(filename)
               elseif opt == 'Insert \\incfig only' then
+                ensure_exported(file_path)
                 insert_incfig(filename)
               elseif opt == 'Open in Inkscape only (edit, no insert)' then
                 spawn_inkscape(file_path)
@@ -1673,24 +1815,15 @@ end
 
 -- Keymap
 vim.keymap.set('n', '<leader>i', open_or_create_inkscape_svg, { desc = 'Open/create Inkscape SVG + insert \\incfig (fuzzy)' })
--- Auto-export SVG -> PDF + PDF_TeX asynchronously
-local repo_root = git_root() or vim.fn.getcwd()
-local images_dir = repo_root .. '/images'
--- TODO: FIX THIS AUTOCMD: it does not export avg into PDF + PDF_TeX on save
+-- Auto-export SVG -> PDF + PDF_TeX when the SVG is saved from nvim itself
+-- (Inkscape saves are handled by watch_images_dir)
 vim.api.nvim_create_autocmd('BufWritePost', {
   pattern = '*.svg',
   callback = function(args)
-    local svg_file = args.file
-    if svg_file:sub(1, #images_dir) == images_dir then
-      local pdf_file = svg_file:gsub('%.svg$', '.pdf')
-      vim.fn.jobstart {
-        'inkscape',
-        svg_file,
-        '--export-type=pdf',
-        '--export-latex',
-        '--export-filename=' .. pdf_file,
-      }
-    end
+    local svg_file = vim.fn.fnamemodify(args.file, ':p')
+    local dir = vim.fn.fnamemodify(svg_file, ':h')
+    if svg_watchers[dir] then return end -- the watcher already exports it
+    if vim.fn.fnamemodify(dir, ':t') == 'images' then export_svg(svg_file) end
   end,
   desc = 'Auto-export SVG to PDF + PDF_TeX asynchronously on save',
 })
